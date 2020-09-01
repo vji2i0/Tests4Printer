@@ -163,23 +163,15 @@ static _Bool conserveSpeedFinish(long Xn, long Yn, long Zn)
     return true;
 }
 
-static long distanceStartFastMove(long totalDistance, float speedStart, float speedFinish, float accelerationStart, float accelerationFinish)
+static float distanceStartFastMove(float totalDistance, float speedStart, float speedFinish, float accelerationStart, float accelerationFinish)
 {
     float distance_float;
     distance_float = (float)totalDistance*(accelerationFinish/(accelerationFinish-accelerationStart))
                     +(speedFinish*speedFinish-speedStart*speedStart)/(2*(accelerationFinish-accelerationStart));
-    return lroundf(distance_float);
+    return distance_float;
 }
 
-static long distanceFinishFastMove(long totalDistance, float speedStart, float speedFinish, float accelerationStart, float accelerationFinish)
-{
-    float distance_float;
-    distance_float = (float)totalDistance*(accelerationStart/(accelerationStart-accelerationFinish))
-                    -(speedFinish*speedFinish-speedStart*speedStart)/(2*(accelerationStart-accelerationFinish));
-    return lroundf(distance_float);
-}
-
-static float speedMaxFastMove(long totalDistance, float speedStart, float speedFinish, float accelerationStart, float accelerationFinish)
+static float speedMaxFastMove(float totalDistance, float speedStart, float speedFinish, float accelerationStart, float accelerationFinish)
 {
     float speed;
     speed = (float)sign(totalDistance)*sqrt(
@@ -189,121 +181,64 @@ static float speedMaxFastMove(long totalDistance, float speedStart, float speedF
     return speed;
 }
 
-static void MoveX_Analyser(void)
+static void MoveXY_Analyser(void)
 {
     long Xn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
     long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
     long En = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
     float distance_XY = sqrtf((float)Xn*(float)Xn+(float)Yn*(float)Yn);
-    float cosX = (float)Xn/distance_XY;     float cosY = (float)Yn/distance_XY;     float tgEX = (float)En/(float)Xn;
-    float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY*cosX;
-    if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECONDS ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECONDS*cosX;
-    if (En != 0) if ( fabs(speedTarget*tgEX) > MAX_SPEED_E_STEPS_PER_SECONDS ) speedTarget = sign(speedTarget)*(float)MAX_SPEED_E_STEPS_PER_SECONDS/fabs(tgEX);
-    float speedStart = 0;
-    if ( conserveSpeedStart(Xn, Yn, 0) ) speedStart = sign(Xn)*sqrt(2*lastCommand().dXn*lastCommand().AnX+pow(lastCommand().FnX,2));
-    float speedFinish = 0;
-    if ( conserveSpeedFinish(Xn, Yn, 0) ) speedFinish = speedTarget;
-    float accelerationStart = ACCELERATION_XY_STEPS_PER_SS*sign(speedTarget-speedStart)*fabs(cosX);
-    float accelerationFinish = ACCELERATION_XY_STEPS_PER_SS*sign(speedFinish-speedTarget)*fabs(cosX);
-    long XnStart = lroundf(0.5*(speedTarget*speedTarget-speedStart*speedStart)/accelerationStart);
-    long XnFinish = lroundf(0.5*(speedFinish*speedFinish-speedTarget*speedTarget)/accelerationFinish);
-    long XnMiddle = Xn - XnStart - XnFinish;
-    if( sign(XnMiddle) != sign(Xn) )
+    float cosX = (float)Xn/distance_XY;     float cosY = (float)Yn/distance_XY;     float cosE = (float)En/(float)distance_XY;
+    float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY;
+    if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECONDS ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECONDS;
+    if (En != 0) if ( fabs(speedTarget*cosE) > MAX_SPEED_E_STEPS_PER_SECONDS ) speedTarget = sign(speedTarget)*(float)MAX_SPEED_E_STEPS_PER_SECONDS/fabs(cosE);
+    float speedStart = 0;   if ( conserveSpeedStart(Xn, Yn, 0) ) speedStart = sqrtf(2*lastCommand().dXn*lastCommand().AnX+2*lastCommand().dYn*lastCommand().AnY+pow(lastCommand().FnX,2)+pow(lastCommand().FnY,2));
+    float speedFinish = 0;  if ( conserveSpeedFinish(Xn, Yn, 0) ) speedFinish = speedTarget;
+    float accelerationStart = ACCELERATION_XY_STEPS_PER_SS*sign(speedTarget-speedStart);
+    float accelerationFinish = ACCELERATION_XY_STEPS_PER_SS*sign(speedFinish-speedTarget);
+    float LnStart  = 0.5*(speedTarget*speedTarget-speedStart*speedStart)/accelerationStart;
+    float LnFinish = 0.5*(speedFinish*speedFinish-speedTarget*speedTarget)/accelerationFinish;
+    float LnMiddle = distance_XY - LnStart - LnFinish;
+    if( LnMiddle < 0 )
     {
         if( conserveSpeedFinish(Xn, Yn, 0) )
         {
-            long x1 = Xn;                   long y1 = Yn;                   long e1 = En;
-            float vX1 = speedStart;         float vY1 = vX1*cosY/cosX;      float vE1 = vX1*tgEX;
-            float aX1 = accelerationStart;  float aY1 = aX1*cosY/cosX;
+            long x1 = Xn;                           long y1 = Yn;                           long e1 = En;
+            float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
+            float aX1 = accelerationStart*cosX;     float aY1 = accelerationStart*cosY;
             command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
         }
         if( conserveSpeedStart(Xn, Yn, 0) )
         {
-            long x1 = Xn;                   long y1 = Yn;                   long e1 = En;
-            float vX1 = speedStart;         float vY1 = vX1*cosY/cosX;      float vE1 = vX1*tgEX;
-            float aX1 = accelerationFinish; float aY1 = aX1*cosY/cosX;
+            long x1 = Xn;                           long y1 = Yn;                           long e1 = En;
+            float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
+            float aX1 = accelerationFinish*cosX;    float aY1 = accelerationFinish*cosY;
             command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
         }
-        long x1 = distanceStartFastMove(Xn, speedStart, speedFinish, accelerationStart, accelerationFinish);    long y1 = lroundf(x1*cosY/cosX);    long e1 = lroundf(x1*tgEX);
-        float vX1 = speedStart;                                                                                 float vY1 = vX1*cosY/cosX;          float vE1 = vX1*tgEX;
-        float aX1 = accelerationStart;                                                                          float aY1 = aX1*cosY/cosX;
+        float distance_XY_buffer = distanceStartFastMove(distance_XY, speedStart, speedFinish, accelerationStart, accelerationFinish);
+        float speed_XY_buffer = speedMaxFastMove(distance_XY, speedStart, speedFinish, accelerationStart, accelerationFinish);
+        long x1 = lroundf(distance_XY_buffer*cosX); long y1 = lroundf(distance_XY_buffer*cosY);    long e1 = lroundf(distance_XY_buffer*cosE);
+        float vX1 = speedStart*cosX;                float vY1 = speedStart*cosY;                   float vE1 = speedStart*cosE;
+        float aX1 = accelerationStart*cosX;         float aY1 = accelerationStart*cosY;
         command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);
-        long x2 = distanceFinishFastMove(Xn, speedStart, speedFinish, accelerationStart, accelerationFinish);   long y2 = Yn - y1;                  long e2 = En - e1;
-        float vX2 = speedMaxFastMove(Xn, speedStart, speedFinish, accelerationStart, accelerationFinish);       float vY2 = vX2*cosY/cosX;          float vE2 = vX2*tgEX;
-        float aX2 = accelerationFinish;                                                                         float aY2 = aX2*cosY/cosX;
+        long x2 = Xn - x1;                      long y2 = Yn - y1;                      long e2 = En - e1;
+        float vX2 = speed_XY_buffer*cosX;       float vY2 = speed_XY_buffer*cosY;       float vE2 = speed_XY_buffer*cosE;
+        float aX2 = accelerationFinish*cosX;    float aY2 = accelerationFinish*cosY;
         command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0,   0, 0};  firstInCommandBuffer_Gcode(command2);  return;
     }
-    long x1 = XnStart;              long y1 = lroundf(x1*cosY/cosX);    long e1 = lroundf(x1*tgEX);
-    float vX1 = speedStart;         float vY1 = vX1*cosY/cosX;          float vE1 = vX1*tgEX;
-    float aX1 = accelerationStart;  float aY1 = aX1*cosY/cosX;
-    command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  if(x1 != 0) firstInCommandBuffer_Gcode(command1);
-    long x2 = XnMiddle;             long y2 = lroundf(x2*cosY/cosX);    long e2 = lroundf(x2*tgEX);     if(XnFinish == 0) {y2 = Yn - y1; e2 = En - e1;}
-    float vX2 = speedTarget;        float vY2 = vX2*cosY/cosX;          float vE2 = vX2*tgEX;
-    float aX2 = 0;                  float aY2 = aX2*cosY/cosX;
+    long x1 = lroundf(LnStart*cosX);        long y1 = lroundf(LnStart*cosY);        long e1 = lroundf(LnStart*cosE);
+    float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
+    float aX1 = accelerationStart*cosX;     float aY1 = accelerationStart*cosY;
+    command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  if(x1 != 0 || y1 != 0) firstInCommandBuffer_Gcode(command1);
+    long x2 = lroundf(LnMiddle*cosX);       long y2 = lroundf(LnMiddle*cosY);   long e2 = lroundf(LnMiddle*cosE);     if(lroundf(LnFinish) == 0) {x2 = Xn - x1; y2 = Yn - y1; e2 = En - e1;}
+    float vX2 = speedTarget*cosX;           float vY2 = speedTarget*cosY;          float vE2 = speedTarget*cosE;
+    float aX2 = 0;                          float aY2 = 0;
     command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0,   0, 0};  firstInCommandBuffer_Gcode(command2);
-    long x3 = XnFinish;             long y3 = Yn - y2 - y1;             long e3 = lroundf(x3*tgEX);
-    float vX3 = speedTarget;        float vY3 = vX3*cosY/cosX;          float vE3 = vX3*tgEX;
-    float aX3 = accelerationFinish; float aY3 = aX3*cosY/cosX;
-    command_Gcode command3 = {MOVE_COMMAND, x3, y3, 0, e3,    vX3, vY3, 0, vE3,    aX3, aY3, 0,   0, 0};  if(x3 != 0) firstInCommandBuffer_Gcode(command3);
+    long x3 = Xn - x1 - x2;                 long y3 = Yn - y2 - y1;                 long e3 = En - e2 - e1;
+    float vX3 = speedTarget*cosX;           float vY3 = speedTarget*cosY;           float vE3 = speedTarget*cosE;
+    float aX3 = accelerationFinish*cosX;    float aY3 = accelerationFinish*cosY;
+    command_Gcode command3 = {MOVE_COMMAND, x3, y3, 0, e3,    vX3, vY3, 0, vE3,    aX3, aY3, 0,   0, 0};  if(x3 != 0 || y3 != 0) firstInCommandBuffer_Gcode(command3);
 }
 
-static void MoveY_Analyser(void)
-{
-    long Xn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
-    long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
-    long En = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
-    float distance_XY = sqrtf((float)Xn*(float)Xn+(float)Yn*(float)Yn);
-    float cosY = (float)Yn/distance_XY;     float cosX = (float)Xn/distance_XY;     float tgEY = (float)En/(float)Yn;
-    float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY*cosY;
-    if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECONDS ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECONDS*cosY;
-    if (En != 0) if ( fabs(speedTarget*tgEY) > MAX_SPEED_E_STEPS_PER_SECONDS ) speedTarget = sign(speedTarget)*(float)MAX_SPEED_E_STEPS_PER_SECONDS/fabs(tgEY);
-    float speedStart = 0;
-    if ( conserveSpeedStart(Xn, Yn, 0) ) speedStart = sign(Yn)*sqrt(2*lastCommand().dYn*lastCommand().AnY+lastCommand().FnY*lastCommand().FnY);
-    float speedFinish = 0;
-    if ( conserveSpeedFinish(Xn, Yn, 0) ) speedFinish = speedTarget;
-    float accelerationStart = ACCELERATION_XY_STEPS_PER_SS*sign(speedTarget-speedStart)*fabs(cosY);
-    float accelerationFinish = ACCELERATION_XY_STEPS_PER_SS*sign(speedFinish-speedTarget)*fabs(cosY);
-    long YnStart = lroundf(0.5*(speedTarget*speedTarget-speedStart*speedStart)/accelerationStart);
-    long YnFinish = lroundf(0.5*(speedFinish*speedFinish-speedTarget*speedTarget)/accelerationFinish);
-    long YnMiddle = Yn - YnStart - YnFinish;
-    if( sign(YnMiddle) != sign(Yn) )
-    {
-        if( conserveSpeedFinish(Xn, Yn, 0) )
-        {
-            long y1 = Yn;                       long x1 = Xn;                   long e1 = En;
-            float vY1 = speedStart;             float vX1 = vY1*cosX/cosY;      float vE1 = vY1*tgEY;
-            float aY1 = accelerationStart;      float aX1 = aY1*cosX/cosY;
-            command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
-        }
-        if( conserveSpeedStart(Xn, Yn, 0) )
-        {
-            long y1 = Yn;                       long x1 = Xn;                   long e1 = En;
-            float vY1 = speedStart;             float vX1 = vY1*cosX/cosY;      float vE1 = vY1*tgEY;
-            float aY1 = accelerationFinish;     float aX1 = aY1*cosX/cosY;
-            command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
-        }
-        long y1 = distanceStartFastMove(Yn, speedStart, speedFinish, accelerationStart, accelerationFinish);    long x1 = lroundf(y1*cosX/cosY);    long e1 = lroundf(y1*tgEY);
-        float vY1 = speedStart;                                                                                 float vX1 = vY1*cosX/cosY;          float vE1 = vY1*tgEY;
-        float aY1 = accelerationStart;                                                                          float aX1 = aY1*cosX/cosY;
-        command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);
-        long y2 = distanceFinishFastMove(Yn, speedStart, speedFinish, accelerationStart, accelerationFinish);   long x2 = Xn - x1;                  long e2 = En - e1;
-        float vY2 = speedMaxFastMove(Yn, speedStart, speedFinish, accelerationStart, accelerationFinish);       float vX2 = vY2*cosX/cosY;          float vE2 = vY2*tgEY;
-        float aY2 = accelerationFinish;                                                                         float aX2 = aY2*cosX/cosY;
-        command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0,   0, 0};  firstInCommandBuffer_Gcode(command2);  return;
-    }
-    long y1 = YnStart;                  long x1 = lroundf(y1*cosX/cosY);    long e1 = lroundf(y1*tgEY);
-    float vY1 = speedStart;             float vX1 = vY1*cosX/cosY;          float vE1 = vY1*tgEY;
-    float aY1 = accelerationStart;      float aX1 = aY1*cosX/cosY;
-    command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0,   0, 0};  if(y1 != 0) firstInCommandBuffer_Gcode(command1);
-    long y2 = YnMiddle;                 long x2 = lroundf(y2*cosX/cosY);    long e2 = lroundf(y2*tgEY);     if(YnFinish == 0) {x2 = Xn - x1; e2 = En - e1;}
-    float vY2 = speedTarget;            float vX2 = vY2*cosX/cosY;          float vE2 = vY2*tgEY;
-    float aY2 = 0;                      float aX2 = aY2*cosX/cosY;
-    command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0,   0, 0};  firstInCommandBuffer_Gcode(command2);
-    long y3 = YnFinish;                 long x3 = Xn - x2 - x1;             long e3 = lroundf(y3*tgEY);
-    float vY3 = speedTarget;            float vX3 = vY3*cosX/cosY;          float vE3 = vY3*tgEY;
-    float aY3 = accelerationFinish;     float aX3 = aY3*cosX/cosY;
-    command_Gcode command3 = {MOVE_COMMAND, x3, y3, 0, e3,    vX3, vY3, 0, vE3,    aX3, aY3, 0,   0, 0};  if(y3 != 0) firstInCommandBuffer_Gcode(command3);
-}
 
 static void MoveE_Analyser(void)
 {
@@ -326,8 +261,8 @@ void descreteCommandAnalyser_Gcode(void)
         long dEn = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
         if (dXn != 0 || dYn != 0)
         {
-            if (abs(dXn) > abs(dYn)) { MoveX_Analyser(); return;}
-            MoveY_Analyser(); return;
+            MoveXY_Analyser();
+            return;
         }
         if (dEn != 0)
             MoveE_Analyser();
@@ -388,15 +323,14 @@ void smoothStop_Gcode(void)
     float speedAtTheEnd, speedAtTheStart, acceleration;     long allowedDistance;
     if (smoothX(command))
     {
-        speedAtTheEnd = 0;                                      speedAtTheStart = command.FnX;
-        acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosX;      allowedDistance = abs(command.dXn);
+        speedAtTheEnd = 0;                                                                          speedAtTheStart = command.FnX;
+        acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosX;                                          allowedDistance = abs(command.dXn);
     }else{
-        speedAtTheEnd = 0;    speedAtTheStart = command.FnY;
-        acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosY;
-        allowedDistance = abs(command.dYn);
+        speedAtTheEnd = 0;                                                                          speedAtTheStart = command.FnY;
+        acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosY;                                          allowedDistance = abs(command.dYn);
     }
-    if    (allowedDistance > distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
-    while (allowedDistance < distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
+    if    (allowedDistance + 1 > distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
+    while (allowedDistance + 1 < distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
     {
         if(smoothX(command))
         {
@@ -421,11 +355,11 @@ void smoothStop_Gcode(void)
     if (smoothX(command))
     {
         xStar = lroundf( acceleration*(float)command.dXn/(acceleration-command.AnX) + ( pow(speedAtTheStart,2) - pow(speedAtTheEnd,2) )/2/(acceleration-command.AnX) );  yStar  = lroundf((float)xStar*cosY/cosX);
-        vxStar = sign(command.dXn)*sqrtf( pow(speedAtTheEnd,2)-2*acceleration*(float)(command.dXn-xStar) );                                                              vyStar = vxStar*cosY/cosX;
+        vxStar = sign(command.dXn)*sqrtf( pow(speedAtTheStart,2)+2*command.AnX*(float)xStar );                                                                           vyStar = vxStar*cosY/cosX;
         axStar = acceleration;                                                                                                                                           ayStar = acceleration*cosY/cosX;
     }else{
         yStar = lroundf( acceleration*(float)command.dYn/(acceleration-command.AnY) + ( pow(speedAtTheStart,2) - pow(speedAtTheEnd,2) )/2/(acceleration-command.AnY) );  xStar  = lroundf((float)yStar*cosX/cosY);
-        vyStar = sign(command.dYn)*sqrtf( pow(speedAtTheEnd,2)-2*acceleration*(float)(command.dYn-yStar) );                                                              vxStar = vyStar*cosX/cosY;
+        vyStar = sign(command.dYn)*sqrtf( pow(speedAtTheStart,2)+2*command.AnY*(float)yStar );                                                                           vxStar = vyStar*cosX/cosY;
         ayStar = acceleration;                                                                                                                                           axStar = acceleration*cosX/cosY;
     }
         commandBuffer[number(currentCommandNumber)].dXn = xStar;                commandBuffer[number(currentCommandNumber)].dYn = yStar;
