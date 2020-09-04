@@ -309,64 +309,48 @@ static void shiftRightAllTheCommandsTillThis(int commandNumber)
     }
 }
 
-static _Bool smoothX(command_Gcode command)
-{
-    if( abs(command.dXn) > abs(command.dYn) )
-        return true;
-    return false;
-}
-
 void smoothStop_Gcode(void)
 {
-    int currentCommandNumber = lastCommandNumber();         command_Gcode command = commandBuffer[number(currentCommandNumber)];
-    float distance_XY = sqrtf( pow((float)command.dXn,2) + pow((float)command.dYn,2) ),   cosX = (float)command.dXn/distance_XY,   cosY = (float)command.dYn/distance_XY;
-    float speedAtTheEnd, speedAtTheStart, acceleration;     long allowedDistance;
-    if (smoothX(command))
+    int currentCommandNumber = lastCommandNumber();
+    command_Gcode command = commandBuffer[number(currentCommandNumber)];
+
+    float speedAtTheEnd = 0;
+    float speedAtTheStart = sqrtf(pow(command.FnX,2)+pow(command.FnY,2));
+    float acceleration = ACCELERATION_XY_STEPS_PER_SS;
+    float allowedDistance = sqrtf( pow(command.dXn,2) + pow(command.dYn,2) );
+    float cosX = (float)command.dXn/allowedDistance;
+    float cosY = (float)command.dYn/allowedDistance;
+
+    if    (allowedDistance + 0.5 > distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
+    while (allowedDistance + 0.5 < distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
     {
-        speedAtTheEnd = 0;                                                                          speedAtTheStart = command.FnX;
-        acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosX;                                          allowedDistance = abs(command.dXn);
-    }else{
-        speedAtTheEnd = 0;                                                                          speedAtTheStart = command.FnY;
-        acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosY;                                          allowedDistance = abs(command.dYn);
-    }
-    if    (allowedDistance + 1 > distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
-    while (allowedDistance + 1 < distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
-    {
-        if(smoothX(command))
-        {
-            commandBuffer[number(currentCommandNumber)].FnX = sign(command.dXn)*sqrtf(pow(speedAtTheEnd,2)-2*acceleration*command.dXn);     commandBuffer[number(currentCommandNumber)].FnY = commandBuffer[number(currentCommandNumber)].FnX*cosY/cosX;
-            commandBuffer[number(currentCommandNumber)].AnX = acceleration;                                                                 commandBuffer[number(currentCommandNumber)].AnY = commandBuffer[number(currentCommandNumber)].AnX*cosY/cosX;
-        }else{
-            commandBuffer[number(currentCommandNumber)].FnY = sign(command.dYn)*sqrtf(pow(speedAtTheEnd,2)-2*acceleration*command.dYn);     commandBuffer[number(currentCommandNumber)].FnX = commandBuffer[number(currentCommandNumber)].FnY*cosX/cosY;
-            commandBuffer[number(currentCommandNumber)].AnY = acceleration;                                                                 commandBuffer[number(currentCommandNumber)].AnX = commandBuffer[number(currentCommandNumber)].AnY*cosX/cosY;
-        }
-        currentCommandNumber = prevoiusCommandNumber(currentCommandNumber);     command = commandBuffer[number(currentCommandNumber)];
-        if(smoothX(command))
-        {
-            speedAtTheEnd = commandBuffer[number(nextCommandNumber(currentCommandNumber))].FnX;     speedAtTheStart = command.FnX;
-            acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosX;                                      allowedDistance = abs(command.dXn);
-        }else{
-            speedAtTheEnd = commandBuffer[number(nextCommandNumber(currentCommandNumber))].FnY;     speedAtTheStart = command.FnY;
-            acceleration = -ACCELERATION_XY_STEPS_PER_SS*cosY;                                      allowedDistance = abs(command.dYn);
-        }
+        commandBuffer[number(currentCommandNumber)].FnX = cosX*sqrtf(pow(speedAtTheEnd,2)+2*acceleration*allowedDistance);
+        commandBuffer[number(currentCommandNumber)].FnY = cosY*sqrtf(pow(speedAtTheEnd,2)+2*acceleration*allowedDistance);
+        commandBuffer[number(currentCommandNumber)].AnX = -cosX*acceleration;
+        commandBuffer[number(currentCommandNumber)].AnY = -cosY*acceleration;
+
+        currentCommandNumber = prevoiusCommandNumber(currentCommandNumber);
+        command = commandBuffer[number(currentCommandNumber)];
+
+        speedAtTheEnd = sqrtf( pow(commandBuffer[number(nextCommandNumber(currentCommandNumber))].FnX,2)+pow(commandBuffer[number(nextCommandNumber(currentCommandNumber))].FnY,2) );
+        speedAtTheStart = sqrtf(pow(command.FnX,2)+pow(command.FnY,2));
+        acceleration = ACCELERATION_XY_STEPS_PER_SS;
+        allowedDistance = sqrtf( pow(command.dXn,2) + pow(command.dYn,2) );
+        cosX = (float)command.dXn/allowedDistance;
+        cosY = (float)command.dYn/allowedDistance;
     }
     shiftRightAllTheCommandsTillThis(currentCommandNumber);
-    long xStar, yStar; float vxStar, vyStar, axStar, ayStar;
-    if (smoothX(command))
-    {
-        xStar = lroundf( acceleration*(float)command.dXn/(acceleration-command.AnX) + ( pow(speedAtTheStart,2) - pow(speedAtTheEnd,2) )/2/(acceleration-command.AnX) );  yStar  = lroundf((float)xStar*cosY/cosX);
-        vxStar = sign(command.dXn)*sqrtf( pow(speedAtTheStart,2)+2*command.AnX*(float)xStar );                                                                           vyStar = vxStar*cosY/cosX;
-        axStar = acceleration;                                                                                                                                           ayStar = acceleration*cosY/cosX;
-    }else{
-        yStar = lroundf( acceleration*(float)command.dYn/(acceleration-command.AnY) + ( pow(speedAtTheStart,2) - pow(speedAtTheEnd,2) )/2/(acceleration-command.AnY) );  xStar  = lroundf((float)yStar*cosX/cosY);
-        vyStar = sign(command.dYn)*sqrtf( pow(speedAtTheStart,2)+2*command.AnY*(float)yStar );                                                                           vxStar = vyStar*cosX/cosY;
-        ayStar = acceleration;                                                                                                                                           axStar = acceleration*cosX/cosY;
-    }
-        commandBuffer[number(currentCommandNumber)].dXn = xStar;                commandBuffer[number(currentCommandNumber)].dYn = yStar;
-        currentCommandNumber = nextCommandNumber(currentCommandNumber);
-        commandBuffer[number(currentCommandNumber)].dXn = command.dXn-xStar;    commandBuffer[number(currentCommandNumber)].dYn = command.dYn-yStar;
-        commandBuffer[number(currentCommandNumber)].FnX = vxStar;               commandBuffer[number(currentCommandNumber)].FnY = vyStar;
-        commandBuffer[number(currentCommandNumber)].AnX = axStar;               commandBuffer[number(currentCommandNumber)].AnY = ayStar;
+
+    float aStar = sqrtf(pow(command.AnX,2)+pow(command.AnY,2));
+    float lStar = acceleration*allowedDistance/(acceleration+aStar) + ( pow(speedAtTheEnd,2) - pow(speedAtTheStart,2) )/2/(acceleration+aStar);
+    float vStar = sqrtf( pow(speedAtTheStart,2) + 2*aStar*lStar );
+
+    commandBuffer[number(currentCommandNumber)].dXn = lroundf(lStar*cosX);              commandBuffer[number(currentCommandNumber)].dYn = lroundf(lStar*cosY);
+
+    currentCommandNumber = nextCommandNumber(currentCommandNumber);
+    commandBuffer[number(currentCommandNumber)].dXn = command.dXn-lroundf(lStar*cosX);  commandBuffer[number(currentCommandNumber)].dYn = command.dYn-lroundf(lStar*cosY);
+    commandBuffer[number(currentCommandNumber)].FnX = vStar*cosX;                       commandBuffer[number(currentCommandNumber)].FnY = vStar*cosY;
+    commandBuffer[number(currentCommandNumber)].AnX = -acceleration*cosX;               commandBuffer[number(currentCommandNumber)].AnY = -acceleration*cosY;
 }
 
 

@@ -3610,22 +3610,22 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 
     CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
 
-    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;           x3 = getCommandBufferElement_Gcode(3).dXn;          x4 = getCommandBufferElement_Gcode(4).dXn;
-    CHECK(x1 > 0);                                       CHECK(x2 > 0);                                       CHECK(x3 > 0);                                      CHECK(x4 > 0);
+    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;                     x3 = getCommandBufferElement_Gcode(3).dXn;                      x4 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 > 0);                                       CHECK(x2 > 0);                                                 CHECK(x3 > 0);                                                  CHECK(x4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Xn, x1+x2+x3+x4);
     CHECK_EQUAL(lroundf(pow(speedTargetX, 2)/2/aDefault/cosX), x3+x4);
-    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;           y3 = getCommandBufferElement_Gcode(3).dYn;          y4 = getCommandBufferElement_Gcode(4).dYn;
-    CHECK(y1 > 0);                                       CHECK(y2 > 0);                                       CHECK(y3 > 0);                                      CHECK(y4 > 0);
+    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;                     y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
+    CHECK(y1 > 0);                                       CHECK(y2 > 0);                                                 CHECK(y3 > 0);                                                  CHECK(y4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
     //CHECK_EQUAL(lroundf(pow(speedTargetY, 2)/2/aDefault/cosY), y3+y4);
-    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;           v3 = getCommandBufferElement_Gcode(3).FnX;          v4 = getCommandBufferElement_Gcode(4).FnX;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < floatError );       CHECK( fabs(speedTargetX - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetX) );
-    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;           v3 = getCommandBufferElement_Gcode(3).FnY;          v4 = getCommandBufferElement_Gcode(4).FnY;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < floatError );       CHECK( fabs(speedTargetY - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetY) );
-    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;           a3 = getCommandBufferElement_Gcode(3).AnX;          a4 = getCommandBufferElement_Gcode(4).AnX;
-    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosX - a3) < floatError );    CHECK( fabs(-aDefault*cosX - a4) < floatError );
-    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;           a3 = getCommandBufferElement_Gcode(3).AnY;          a4 = getCommandBufferElement_Gcode(4).AnY;
-    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosY - a3) < floatError );    CHECK( fabs(-aDefault*cosY - a4) < floatError );
+    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;                     v3 = getCommandBufferElement_Gcode(3).FnX;                      v4 = getCommandBufferElement_Gcode(4).FnX;
+    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < 0.01*fabs(v2)+floatError );   CHECK( fabs(speedTargetX - v3) < 0.01*fabs(v3)+floatError );    CHECK( fabs(v4) < fabs(speedTargetX) );
+    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;                     v3 = getCommandBufferElement_Gcode(3).FnY;                      v4 = getCommandBufferElement_Gcode(4).FnY;
+    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < 0.01*fabs(v2)+floatError );   CHECK( fabs(speedTargetY - v3) < 0.01*fabs(v3)+floatError );    CHECK( fabs(v4) < fabs(speedTargetY) );
+    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;                     a3 = getCommandBufferElement_Gcode(3).AnX;                      a4 = getCommandBufferElement_Gcode(4).AnX;
+    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosX - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosX - a4) < 0.01*fabs(a4)+floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;                     a3 = getCommandBufferElement_Gcode(3).AnY;                      a4 = getCommandBufferElement_Gcode(4).AnY;
+    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosY - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosY - a4) < 0.01*fabs(a4)+floatError );
 }
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_speed_2_smoothly)
@@ -3696,22 +3696,22 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 
     CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
 
-    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;           x3 = getCommandBufferElement_Gcode(3).dXn;          x4 = getCommandBufferElement_Gcode(4).dXn;
-    CHECK(x1 > 0);                                       CHECK(x2 > 0);                                       CHECK(x3 > 0);                                      CHECK(x4 > 0);
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;                      x3 = getCommandBufferElement_Gcode(3).dXn;                      x4 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);                                                  CHECK(x3 > 0);                                                  CHECK(x4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Xn, x1+x2+x3+x4);
     //CHECK_EQUAL(lroundf(pow(speedTargetX, 2)/2/aDefault/cosX), x3+x4);
-    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;           y3 = getCommandBufferElement_Gcode(3).dYn;          y4 = getCommandBufferElement_Gcode(4).dYn;
-    CHECK(y1 > 0);                                       CHECK(y2 > 0);                                       CHECK(y3 > 0);                                      CHECK(y4 > 0);
+    y1 = getCommandBufferElement_Gcode(1).dYn;                      y2 = getCommandBufferElement_Gcode(2).dYn;                      y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
+    CHECK(y1 > 0);                                                  CHECK(y2 > 0);                                                  CHECK(y3 > 0);                                                  CHECK(y4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
     CHECK_EQUAL(lroundf(pow(speedTargetY, 2)/2/aDefault/cosY), y3+y4);
-    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;           v3 = getCommandBufferElement_Gcode(3).FnX;          v4 = getCommandBufferElement_Gcode(4).FnX;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < floatError );       CHECK( fabs(speedTargetX - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetX) );
-    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;           v3 = getCommandBufferElement_Gcode(3).FnY;          v4 = getCommandBufferElement_Gcode(4).FnY;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < floatError );       CHECK( fabs(speedTargetY - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetY) );
-    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;           a3 = getCommandBufferElement_Gcode(3).AnX;          a4 = getCommandBufferElement_Gcode(4).AnX;
-    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosX - a3) < floatError );    CHECK( fabs(-aDefault*cosX - a4) < floatError );
-    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;           a3 = getCommandBufferElement_Gcode(3).AnY;          a4 = getCommandBufferElement_Gcode(4).AnY;
-    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosY - a3) < floatError );    CHECK( fabs(-aDefault*cosY - a4) < floatError );
+    v1 = getCommandBufferElement_Gcode(1).FnX;                      v2 = getCommandBufferElement_Gcode(2).FnX;                      v3 = getCommandBufferElement_Gcode(3).FnX;                      v4 = getCommandBufferElement_Gcode(4).FnX;
+    CHECK( fabs(0 - v1) < floatError );                             CHECK( fabs(speedTargetX - v2) < 0.01*fabs(v2)+floatError );    CHECK( fabs(speedTargetX - v3) < 0.01*fabs(v3)+floatError );    CHECK( fabs(v4) < fabs(speedTargetX) );
+    v1 = getCommandBufferElement_Gcode(1).FnY;                      v2 = getCommandBufferElement_Gcode(2).FnY;                      v3 = getCommandBufferElement_Gcode(3).FnY;                      v4 = getCommandBufferElement_Gcode(4).FnY;
+    CHECK( fabs(0 - v1) < floatError );                             CHECK( fabs(speedTargetY - v2) < 0.01*fabs(v2)+floatError );    CHECK( fabs(speedTargetY - v3) < 0.01*fabs(v3)+floatError );    CHECK( fabs(v4) < fabs(speedTargetY) );
+    a1 = getCommandBufferElement_Gcode(1).AnX;                      a2 = getCommandBufferElement_Gcode(2).AnX;                      a3 = getCommandBufferElement_Gcode(3).AnX;                      a4 = getCommandBufferElement_Gcode(4).AnX;
+    CHECK( fabs(aDefault*cosX - a1) < 0.01*fabs(a1)+floatError );   CHECK( fabs(0 - a2) < floatError );                             CHECK( fabs(-aDefault*cosX - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosX - a4) < 0.01*fabs(a4)+floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;                      a2 = getCommandBufferElement_Gcode(2).AnY;                      a3 = getCommandBufferElement_Gcode(3).AnY;                      a4 = getCommandBufferElement_Gcode(4).AnY;
+    CHECK( fabs(aDefault*cosY - a1) < 0.01*fabs(a1)+floatError );   CHECK( fabs(0 - a2) < floatError );                             CHECK( fabs(-aDefault*cosY - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosY - a4) < 0.01*fabs(a4)+floatError );
 }
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_speed_3_smoothly)
@@ -3868,22 +3868,22 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 
     CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
 
-    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;           x3 = getCommandBufferElement_Gcode(3).dXn;          x4 = getCommandBufferElement_Gcode(4).dXn;
-    CHECK(x1 < 0);                                       CHECK(x2 < 0);                                       CHECK(x3 < 0);                                      CHECK(x4 < 0);
+    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;                     x3 = getCommandBufferElement_Gcode(3).dXn;                      x4 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 < 0);                                       CHECK(x2 < 0);                                                 CHECK(x3 < 0);                                                  CHECK(x4 < 0);
     CHECK_EQUAL(descreteMoveSlow2.Xn, x1+x2+x3+x4);
     CHECK_EQUAL(lroundf(pow(speedTargetX, 2)/2/aDefault/cosX), x3+x4);
-    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;           y3 = getCommandBufferElement_Gcode(3).dYn;          y4 = getCommandBufferElement_Gcode(4).dYn;
-    CHECK(y1 < 0);                                       CHECK(y2 < 0);                                       CHECK(y3 < 0);                                      CHECK(y4 < 0);
+    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;                     y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
+    CHECK(y1 < 0);                                       CHECK(y2 < 0);                                                 CHECK(y3 < 0);                                                  CHECK(y4 < 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
     //CHECK_EQUAL(lroundf(pow(speedTargetY, 2)/2/aDefault/cosY), y3+y4);
-    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;           v3 = getCommandBufferElement_Gcode(3).FnX;          v4 = getCommandBufferElement_Gcode(4).FnX;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < floatError );       CHECK( fabs(speedTargetX - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetX) );
-    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;           v3 = getCommandBufferElement_Gcode(3).FnY;          v4 = getCommandBufferElement_Gcode(4).FnY;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < floatError );       CHECK( fabs(speedTargetY - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetY) );
-    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;           a3 = getCommandBufferElement_Gcode(3).AnX;          a4 = getCommandBufferElement_Gcode(4).AnX;
-    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosX - a3) < floatError );    CHECK( fabs(-aDefault*cosX - a4) < floatError );
-    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;           a3 = getCommandBufferElement_Gcode(3).AnY;          a4 = getCommandBufferElement_Gcode(4).AnY;
-    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosY - a3) < floatError );    CHECK( fabs(-aDefault*cosY - a4) < floatError );
+    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;                     v3 = getCommandBufferElement_Gcode(3).FnX;                      v4 = getCommandBufferElement_Gcode(4).FnX;
+    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < 0.01*fabs(v2)+floatError );   CHECK( fabs(speedTargetX - v3) < 0.01*fabs(v3)+floatError );    CHECK( fabs(v4) < fabs(speedTargetX) );
+    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;                     v3 = getCommandBufferElement_Gcode(3).FnY;                      v4 = getCommandBufferElement_Gcode(4).FnY;
+    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < 0.01*fabs(v2)+floatError );   CHECK( fabs(speedTargetY - v3) < 0.01*fabs(v3)+floatError );    CHECK( fabs(v4) < fabs(speedTargetY) );
+    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;                     a3 = getCommandBufferElement_Gcode(3).AnX;                      a4 = getCommandBufferElement_Gcode(4).AnX;
+    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosX - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosX - a4) < 0.01*fabs(a4)+floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;                     a3 = getCommandBufferElement_Gcode(3).AnY;                      a4 = getCommandBufferElement_Gcode(4).AnY;
+    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosY - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosY - a4) < 0.01*fabs(a4)+floatError );
 }
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_speed_2_backwards_smoothly)
@@ -3954,22 +3954,22 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 
     CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
 
-    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;           x3 = getCommandBufferElement_Gcode(3).dXn;          x4 = getCommandBufferElement_Gcode(4).dXn;
-    CHECK(x1 < 0);                                       CHECK(x2 < 0);                                       CHECK(x3 < 0);                                      CHECK(x4 < 0);
+    x1 = getCommandBufferElement_Gcode(1).dXn;           x2 = getCommandBufferElement_Gcode(2).dXn;                     x3 = getCommandBufferElement_Gcode(3).dXn;                      x4 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 < 0);                                       CHECK(x2 < 0);                                                 CHECK(x3 < 0);                                                  CHECK(x4 < 0);
     CHECK_EQUAL(descreteMoveSlow2.Xn, x1+x2+x3+x4);
     //CHECK_EQUAL(lroundf(pow(speedTargetX, 2)/2/aDefault/cosX), x3+x4);
-    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;           y3 = getCommandBufferElement_Gcode(3).dYn;          y4 = getCommandBufferElement_Gcode(4).dYn;
-    CHECK(y1 < 0);                                       CHECK(y2 < 0);                                       CHECK(y3 < 0);                                      CHECK(y4 < 0);
+    y1 = getCommandBufferElement_Gcode(1).dYn;           y2 = getCommandBufferElement_Gcode(2).dYn;                     y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
+    CHECK(y1 < 0);                                       CHECK(y2 < 0);                                                 CHECK(y3 < 0);                                                  CHECK(y4 < 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
     CHECK_EQUAL(lroundf(pow(speedTargetY, 2)/2/aDefault/cosY), y3+y4);
-    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;           v3 = getCommandBufferElement_Gcode(3).FnX;          v4 = getCommandBufferElement_Gcode(4).FnX;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < floatError );       CHECK( fabs(speedTargetX - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetX) );
-    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;           v3 = getCommandBufferElement_Gcode(3).FnY;          v4 = getCommandBufferElement_Gcode(4).FnY;
-    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < floatError );       CHECK( fabs(speedTargetY - v3) < floatError );      CHECK( fabs(v4) < fabs(speedTargetY) );
-    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;           a3 = getCommandBufferElement_Gcode(3).AnX;          a4 = getCommandBufferElement_Gcode(4).AnX;
-    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosX - a3) < floatError );    CHECK( fabs(-aDefault*cosX - a4) < floatError );
-    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;           a3 = getCommandBufferElement_Gcode(3).AnY;          a4 = getCommandBufferElement_Gcode(4).AnY;
-    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                  CHECK( fabs(-aDefault*cosY - a3) < floatError );    CHECK( fabs(-aDefault*cosY - a4) < floatError );
+    v1 = getCommandBufferElement_Gcode(1).FnX;           v2 = getCommandBufferElement_Gcode(2).FnX;                     v3 = getCommandBufferElement_Gcode(3).FnX;                      v4 = getCommandBufferElement_Gcode(4).FnX;
+    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetX - v2) < 0.01*fabs(v2)+floatError );    CHECK( fabs(speedTargetX - v3) < 0.01*fabs(v3)+floatError );   CHECK( fabs(v4) < fabs(speedTargetX) );
+    v1 = getCommandBufferElement_Gcode(1).FnY;           v2 = getCommandBufferElement_Gcode(2).FnY;                     v3 = getCommandBufferElement_Gcode(3).FnY;                      v4 = getCommandBufferElement_Gcode(4).FnY;
+    CHECK( fabs(0 - v1) < floatError );                  CHECK( fabs(speedTargetY - v2) < 0.01*fabs(v2)+floatError );    CHECK( fabs(speedTargetY - v3) < 0.01*fabs(v3)+floatError );   CHECK( fabs(v4) < fabs(speedTargetY) );
+    a1 = getCommandBufferElement_Gcode(1).AnX;           a2 = getCommandBufferElement_Gcode(2).AnX;                     a3 = getCommandBufferElement_Gcode(3).AnX;                      a4 = getCommandBufferElement_Gcode(4).AnX;
+    CHECK( fabs(aDefault*cosX - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosX - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosX - a4) < floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;           a2 = getCommandBufferElement_Gcode(2).AnY;                     a3 = getCommandBufferElement_Gcode(3).AnY;                      a4 = getCommandBufferElement_Gcode(4).AnY;
+    CHECK( fabs(aDefault*cosY - a1) < floatError );      CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosY - a3) < 0.01*fabs(a3)+floatError );  CHECK( fabs(-aDefault*cosY - a4) < floatError );
 }
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_speed_3_backwards_smoothly)
@@ -5045,7 +5045,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     20000, 10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    float distance1 = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
+    float distance1 = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2.0));
     float cosX1 = (float)descreteMoveSlow1.Xn/distance1;
     float cosY1 = (float)descreteMoveSlow1.Yn/distance1;
     float speedTargetX1 = cosX1*descreteMoveSlow1.FnXY;
@@ -5053,16 +5053,16 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 
     const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20090, 10050, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
-    float distance2 = sqrt(pow((float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn), 2.0)+pow((float)(descreteMoveSlow2.Yn-descreteMoveSlow1.Yn),2));
+    float distance2 = sqrt(pow((float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn),2)+pow((float)(descreteMoveSlow2.Yn-descreteMoveSlow1.Yn),2));
     float cosX2 = (float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn)/distance2;
     float cosY2 = (float)(descreteMoveSlow2.Yn-descreteMoveSlow1.Yn)/distance2;
 
+    //CHECK_EQUAL(0, distance1+distance2);
 
-
-    long  x1, x2;
-    long  y1, y2;
-    float v1, v2;
-    float a1, a2;
+    long  x1, x2, x3, x4;
+    long  y1, y2, y3, y4;
+    float v1, v2, v3, v4;
+    float a1, a2, a3, a4;
 
     addElementToDescreteCommandBuffer_Gcode(descreteMoveSlow1);
     addElementToDescreteCommandBuffer_Gcode(descreteMoveSlow2);
@@ -5104,4 +5104,25 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
     CHECK( fabs(-aDefault*cosX2 - a1) < floatError );
     a1 = getCommandBufferElement_Gcode(3).AnY;
     CHECK( fabs(-aDefault*cosY2 - a1) < floatError );
+
+    smoothStop_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                  x2 = getCommandBufferElement_Gcode(2).dXn;                         x3 = getCommandBufferElement_Gcode(3).dXn;                      x4 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 > 0);                                              CHECK(x2 > 0);                                                     CHECK(x3 > 0);                                                  CHECK(x4 > 0);
+    CHECK_EQUAL(descreteMoveSlow2.Xn, x1+x2+x3+x4);
+    y1 = getCommandBufferElement_Gcode(1).dYn;                  y2 = getCommandBufferElement_Gcode(2).dYn;                         y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
+    CHECK(y1 > 0);                                              CHECK(y2 > 0);                                                     CHECK(y3 > 0);                                                  CHECK(y4 > 0);
+    CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
+    CHECK_EQUAL(lroundf(pow(descreteMoveSlow1.FnXY, 2)/2/aDefault), lroundf( sqrtf(pow(x3,2)+pow(y3,2)) + sqrtf(pow(x4,2)+pow(y4,2)) ));
+    v1 = getCommandBufferElement_Gcode(1).FnX;                  v2 = getCommandBufferElement_Gcode(2).FnX;                         v3 = getCommandBufferElement_Gcode(3).FnX;                      v4 = getCommandBufferElement_Gcode(4).FnX;
+    CHECK( fabs(0 - v1) < floatError );                         CHECK( fabs(speedTargetX1 - v2) < 0.01*fabs(v2)+floatError );      CHECK( fabs(speedTargetX1 - v3) < 0.01*fabs(v3)+floatError );   CHECK( fabs(v4) < fabs(descreteMoveSlow1.FnXY*cosX2) );
+    v1 = getCommandBufferElement_Gcode(1).FnY;                  v2 = getCommandBufferElement_Gcode(2).FnY;                         v3 = getCommandBufferElement_Gcode(3).FnY;                      v4 = getCommandBufferElement_Gcode(4).FnY;
+    CHECK( fabs(0 - v1) < floatError );                         CHECK( fabs(speedTargetY1 - v2) < 0.01*fabs(v2)+floatError );      CHECK( fabs(speedTargetY1 - v3) < 0.01*fabs(v3)+floatError );   CHECK( fabs(v4) < fabs(descreteMoveSlow1.FnXY*cosY2) );
+    a1 = getCommandBufferElement_Gcode(1).AnX;                  a2 = getCommandBufferElement_Gcode(2).AnX;                         a3 = getCommandBufferElement_Gcode(3).AnX;                      a4 = getCommandBufferElement_Gcode(4).AnX;
+    CHECK( fabs(aDefault*cosX1 - a1) < fabs(a1)+floatError );   CHECK( fabs(0 - a2) < floatError );                                CHECK( fabs(-aDefault*cosX1 - a3) < fabs(a3)+floatError );      CHECK( fabs(-aDefault*cosX2 - a4) < fabs(a4)+floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;                  a2 = getCommandBufferElement_Gcode(2).AnY;                         a3 = getCommandBufferElement_Gcode(3).AnY;                      a4 = getCommandBufferElement_Gcode(4).AnY;
+    CHECK( fabs(aDefault*cosY1 - a1) < fabs(a1)+floatError );   CHECK( fabs(0 - a2) < floatError );                                CHECK( fabs(-aDefault*cosY1 - a3) < fabs(a3)+floatError );      CHECK( fabs(-aDefault*cosY2 - a4) < fabs(a4)+floatError );
+
 }
