@@ -19,7 +19,7 @@ typedef struct
     commandType_Gcode type;
     long dXn, dYn, dZn, dEn;
     float FnX, FnY, FnZ, FnE;
-    float AnX, AnY, AnZ;
+    float AnX, AnY, AnZ, AnE;
     float extrT, bedT;
 } command_Gcode;
 
