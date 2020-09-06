@@ -112,7 +112,9 @@ _Bool enoghSpaceIsReservedCommandBuffer_Gcode(void)
 }
 
 static const float ACCELERATION_XY_STEPS_PER_SS = (float)ACCELERATION_MM_MIN_S_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float ACCELERATION_Z_STEPS_PER_SS = (float)ACCELERATION_MM_MIN_S_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
 static const float MAX_SPEED_XY_STEPS_PER_SECONDS = (float)MAX_SPEED_MM_MIN_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float MAX_SPEED_Z_STEPS_PER_SECONDS = (float)MAX_SPEED_MM_MIN_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
 static const float MAX_SPEED_E_STEPS_PER_SECONDS = (float)MAX_SPEED_MM_MIN_E*(float)STEPS_PER_MM_E/(float)SECONDS_IN_MINUTE;
 
 static long sign(float x)
@@ -250,6 +252,48 @@ static void MoveE_Analyser(void)
     command_Gcode command1 = {MOVE_COMMAND, 0, 0, 0, e1,    0, 0, 0, vE1,    0, 0, 0,   0, 0}; firstInCommandBuffer_Gcode(command1);
 }
 
+static void MoveZ_Analyser(void)
+{
+
+    long Zn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
+    float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnZ;
+    if ( getDescreteCommandBufferElement_Gcode(2).FnZ > MAX_SPEED_Z_STEPS_PER_SECONDS ) speedTarget = MAX_SPEED_Z_STEPS_PER_SECONDS;
+    float speedStart = 0;
+    float speedFinish = 0;
+    float accelerationStart = ACCELERATION_Z_STEPS_PER_SS*sign(speedTarget-speedStart);
+    float accelerationFinish = ACCELERATION_Z_STEPS_PER_SS*sign(speedFinish-speedTarget);
+    float LnStart  = 0.5*(speedTarget*speedTarget-speedStart*speedStart)/accelerationStart;
+    float LnFinish = 0.5*(speedFinish*speedFinish-speedTarget*speedTarget)/accelerationFinish;
+    float LnMiddle = (float)abs(Zn) - LnStart - LnFinish;
+    if( LnMiddle < 0 )
+    {
+        float distance_Z_buffer = distanceStartFastMove((float)abs(Zn), speedStart, speedFinish, accelerationStart, accelerationFinish);
+        float speed_Z_buffer = speedMaxFastMove((float)abs(Zn), speedStart, speedFinish, accelerationStart, accelerationFinish);
+        long z1 = lroundf(distance_Z_buffer*sign(Zn));
+        float vZ1 = speedStart;
+        float aZ1 = accelerationStart*sign(Zn);
+        command_Gcode command1 = {MOVE_COMMAND, 0, 0, z1, 0,    0, 0, vZ1, 0,    0, 0, aZ1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);
+        long z2 = Zn - z1;
+        float vZ2 = speed_Z_buffer*sign(Zn);
+        float aZ2 = accelerationFinish*sign(Zn);
+        command_Gcode command2 = {MOVE_COMMAND, 0, 0, z2, 0,    0, 0, vZ2, 0,    0, 0, aZ2, 0,   0, 0};  firstInCommandBuffer_Gcode(command2);  return;
+    }
+    long z1 = lroundf(LnStart*sign(Zn));
+    float vZ1 = speedStart*sign(Zn);
+    float aZ1 = accelerationStart*sign(Zn);
+    command_Gcode command1 = {MOVE_COMMAND, 0, 0, z1, 0,    0, 0, vZ1, 0,    0, 0, aZ1, 0,   0, 0};  firstInCommandBuffer_Gcode(command1);
+    long z2 = lroundf(LnMiddle*sign(Zn));
+    float vZ2 = speedTarget*sign(Zn);
+    float aZ2 = 0;
+    command_Gcode command2 = {MOVE_COMMAND, 0, 0, z2, 0,    0, 0, vZ2, 0,    0, 0, aZ2, 0,   0, 0};  firstInCommandBuffer_Gcode(command2);
+    long z3 = Zn - z1 - z2;
+    float vZ3 = speedTarget*sign(Zn);
+    float aZ3 = accelerationFinish*sign(Zn);
+    command_Gcode command3 = {MOVE_COMMAND, 0, 0, z3, 0,    0, 0, vZ3, 0,    0, 0, aZ3, 0,   0, 0};  firstInCommandBuffer_Gcode(command3);
+}
+
+
+
 void descreteCommandAnalyser_Gcode(void)
 {
     commandType_Gcode typeOfCommand = getDescreteCommandBufferElement_Gcode(2).type;
@@ -258,7 +302,10 @@ void descreteCommandAnalyser_Gcode(void)
     {
         long dXn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
         long dYn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
+        long dZn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
         long dEn = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
+        if (dZn != 0)
+            MoveZ_Analyser();
         if (dXn != 0 || dYn != 0)
         {
             MoveXY_Analyser();
