@@ -113,9 +113,9 @@ _Bool enoghSpaceIsReservedCommandBuffer_Gcode(void)
 
 static const float ACCELERATION_XY_STEPS_PER_SS = (float)ACCELERATION_MM_MIN_S_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
 static const float ACCELERATION_Z_STEPS_PER_SS = (float)ACCELERATION_MM_MIN_S_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
-static const float MAX_SPEED_XY_STEPS_PER_SECONDS = (float)MAX_SPEED_MM_MIN_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
-static const float MAX_SPEED_Z_STEPS_PER_SECONDS = (float)MAX_SPEED_MM_MIN_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
-static const float MAX_SPEED_E_STEPS_PER_SECONDS = (float)MAX_SPEED_MM_MIN_E*(float)STEPS_PER_MM_E/(float)SECONDS_IN_MINUTE;
+static const float MAX_SPEED_XY_STEPS_PER_SECOND = (float)MAX_SPEED_MM_MIN_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float MAX_SPEED_Z_STEPS_PER_SECOND = (float)MAX_SPEED_MM_MIN_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
+static const float MAX_SPEED_E_STEPS_PER_SECOND = (float)MAX_SPEED_MM_MIN_E*(float)STEPS_PER_MM_E/(float)SECONDS_IN_MINUTE;
 
 static long sign(float x)
 {
@@ -188,17 +188,15 @@ static void MoveXY_Analyser(void)
     long Xn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
     long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
     long En = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
-    float distance_XY = sqrtf((float)Xn*(float)Xn+(float)Yn*(float)Yn);
-    float cosX = (float)Xn/distance_XY;     float cosY = (float)Yn/distance_XY;     float cosE = (float)En/(float)distance_XY;
-    float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY;
-    if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECONDS ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECONDS;
-    if (En != 0) if ( fabs(speedTarget*cosE) > MAX_SPEED_E_STEPS_PER_SECONDS ) speedTarget = sign(speedTarget)*(float)MAX_SPEED_E_STEPS_PER_SECONDS/fabs(cosE);
-    float speedStart = 0;   if ( conserveSpeedStart(Xn, Yn, 0) ) speedStart = sqrtf(2*lastCommand().dXn*lastCommand().AnX+2*lastCommand().dYn*lastCommand().AnY+pow(lastCommand().FnX,2)+pow(lastCommand().FnY,2));
-    float speedFinish = 0;  if ( conserveSpeedFinish(Xn, Yn, 0) ) speedFinish = speedTarget;
+    float distance_XY = sqrtf(pow(Xn,2)+pow(Yn,2)); float cosX = (float)Xn/distance_XY; float cosY = (float)Yn/distance_XY; float cosE = (float)En/(float)distance_XY;
+    float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY;  if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECOND ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECOND;
+    if (En != 0) if ( fabs(speedTarget*cosE) > MAX_SPEED_E_STEPS_PER_SECOND ) speedTarget = sign(speedTarget)*(float)MAX_SPEED_E_STEPS_PER_SECOND/fabs(cosE);
+    float speedStart = 0;                                               if ( conserveSpeedStart(Xn, Yn, 0)  ) speedStart = sqrtf(2*lastCommand().dXn*lastCommand().AnX+2*lastCommand().dYn*lastCommand().AnY+pow(lastCommand().FnX,2)+pow(lastCommand().FnY,2));
+    float speedFinish = 0;                                              if ( conserveSpeedFinish(Xn, Yn, 0) ) speedFinish = speedTarget;
     float accelerationStart = ACCELERATION_XY_STEPS_PER_SS*sign(speedTarget-speedStart);
     float accelerationFinish = ACCELERATION_XY_STEPS_PER_SS*sign(speedFinish-speedTarget);
-    float LnStart  = 0.5*(speedTarget*speedTarget-speedStart*speedStart)/accelerationStart;
-    float LnFinish = 0.5*(speedFinish*speedFinish-speedTarget*speedTarget)/accelerationFinish;
+    float LnStart  = 0.5*(pow(speedTarget,2)-pow(speedStart,2))/accelerationStart;
+    float LnFinish = 0.5*(pow(speedFinish,2)-pow(speedTarget,2))/accelerationFinish;
     float LnMiddle = distance_XY - LnStart - LnFinish;
     if( LnMiddle < 0 )
     {
@@ -241,12 +239,11 @@ static void MoveXY_Analyser(void)
     command_Gcode command3 = {MOVE_COMMAND, x3, y3, 0, e3,    vX3, vY3, 0, vE3,    aX3, aY3, 0, aE3,   0, 0};  if(x3 != 0 || y3 != 0) firstInCommandBuffer_Gcode(command3);
 }
 
-
 static void MoveE_Analyser(void)
 {
     long En = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
     float speedTarget = sign(En)*getDescreteCommandBufferElement_Gcode(2).FnE;
-    if (getDescreteCommandBufferElement_Gcode(2).FnE > MAX_SPEED_E_STEPS_PER_SECONDS) speedTarget = sign(En)*MAX_SPEED_E_STEPS_PER_SECONDS;
+    if (getDescreteCommandBufferElement_Gcode(2).FnE > MAX_SPEED_E_STEPS_PER_SECOND) speedTarget = sign(En)*MAX_SPEED_E_STEPS_PER_SECOND;
     long e1 = En;
     float vE1 = speedTarget;
     command_Gcode command1 = {MOVE_COMMAND, 0, 0, 0, e1,    0, 0, 0, vE1,    0, 0, 0,   0, 0}; firstInCommandBuffer_Gcode(command1);
@@ -257,18 +254,18 @@ static void MoveZ_Analyser(void)
 
     long Zn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
     float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnZ;
-    if ( getDescreteCommandBufferElement_Gcode(2).FnZ > MAX_SPEED_Z_STEPS_PER_SECONDS ) speedTarget = MAX_SPEED_Z_STEPS_PER_SECONDS;
+    if ( getDescreteCommandBufferElement_Gcode(2).FnZ > MAX_SPEED_Z_STEPS_PER_SECOND ) speedTarget = MAX_SPEED_Z_STEPS_PER_SECOND;
     float speedStart = 0;
     float speedFinish = 0;
     float accelerationStart = ACCELERATION_Z_STEPS_PER_SS*sign(speedTarget-speedStart);
     float accelerationFinish = ACCELERATION_Z_STEPS_PER_SS*sign(speedFinish-speedTarget);
-    float LnStart  = 0.5*(speedTarget*speedTarget-speedStart*speedStart)/accelerationStart;
-    float LnFinish = 0.5*(speedFinish*speedFinish-speedTarget*speedTarget)/accelerationFinish;
+    float LnStart  = 0.5*(pow(speedTarget,2)-pow(speedStart,2))/accelerationStart;
+    float LnFinish = 0.5*(pow(speedFinish,2)-pow(speedTarget,2))/accelerationFinish;
     float LnMiddle = (float)abs(Zn) - LnStart - LnFinish;
     if( LnMiddle < 0 )
     {
-        float distance_Z_buffer = distanceStartFastMove((float)abs(Zn), speedStart, speedFinish, accelerationStart, accelerationFinish);
-        float speed_Z_buffer = speedMaxFastMove((float)abs(Zn), speedStart, speedFinish, accelerationStart, accelerationFinish);
+        float distance_Z_buffer = distanceStartFastMove( (float)abs(Zn), speedStart, speedFinish, accelerationStart, accelerationFinish );
+        float speed_Z_buffer = speedMaxFastMove( (float)abs(Zn), speedStart, speedFinish, accelerationStart, accelerationFinish );
         long z1 = lroundf(distance_Z_buffer*sign(Zn));
         float vZ1 = speedStart;
         float aZ1 = accelerationStart*sign(Zn);
@@ -292,18 +289,59 @@ static void MoveZ_Analyser(void)
     command_Gcode command3 = {MOVE_COMMAND, 0, 0, z3, 0,    0, 0, vZ3, 0,    0, 0, aZ3, 0,   0, 0};  firstInCommandBuffer_Gcode(command3);
 }
 
+static const float HOME_COARSE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float HOME_FINE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const long  HOME_FINE_STEPS_XY = HOME_FINE_DISTANCE*STEPS_PER_MM_XY;
+
+static void HomeX_Analyser(void)
+{
+    long dXn = getDescreteCommandBufferElement_Gcode(2).Xn;
+    long x; float v; float a;
+
+    long  L_HOME_XY = lroundf(pow(HOME_COARSE_SPEED_XY_STEPS_PER_SECOND,2)/(2*ACCELERATION_XY_STEPS_PER_SS));
+
+    x = 0;                          v = -HOME_COARSE_SPEED_XY_STEPS_PER_SECOND;         a = 0;
+    command_Gcode command1 = {GO_HOME_X_COMMAND, x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command1);
+    x = HOME_FINE_STEPS_XY;         v = HOME_COARSE_SPEED_XY_STEPS_PER_SECOND;          a = 0;
+    command_Gcode command2 = {MOVE_COMMAND,      x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command2);
+    x = 0;                          v = -HOME_FINE_SPEED_XY_STEPS_PER_SECOND;           a = 0;
+    command_Gcode command3 = {GO_HOME_X_COMMAND, x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command3);
+    if (dXn <= 0)
+        return;
+
+    if (dXn < 2*L_HOME_XY)
+    {
+        long  xStar = lroundf(0.25+(float)dXn/2);
+        float vStar = sqrtf(2*ACCELERATION_XY_STEPS_PER_SS*xStar);
+        x = xStar;                  v = 0;                                              a = ACCELERATION_XY_STEPS_PER_SS;
+        command_Gcode command4 = {MOVE_COMMAND,      x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command4);
+        x = dXn-xStar;              v = vStar;                                          a = -ACCELERATION_XY_STEPS_PER_SS;
+        command_Gcode command5 = {MOVE_COMMAND,      x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command5);
+        return;
+    }
+
+    x = L_HOME_XY;              v = 0;                                              a = ACCELERATION_XY_STEPS_PER_SS;
+    command_Gcode command4 = {MOVE_COMMAND,      x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command4);
+    x = dXn-2*L_HOME_XY;        v = HOME_COARSE_SPEED_XY_STEPS_PER_SECOND;          a = 0;
+    command_Gcode command5 = {MOVE_COMMAND,      x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command5);
+    x = L_HOME_XY;              v = HOME_COARSE_SPEED_XY_STEPS_PER_SECOND;          a = -ACCELERATION_XY_STEPS_PER_SS;
+    command_Gcode command6 = {MOVE_COMMAND,      x, 0, 0, 0,    v, 0, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command6);
+}
 
 
 void descreteCommandAnalyser_Gcode(void)
 {
     commandType_Gcode typeOfCommand = getDescreteCommandBufferElement_Gcode(2).type;
+    long dXn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
+    long dYn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
+    long dZn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
+    long dEn = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
+
+    if (typeOfCommand == GO_HOME_X_COMMAND)
+        HomeX_Analyser();
 
     if (typeOfCommand == MOVE_COMMAND)
     {
-        long dXn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
-        long dYn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
-        long dZn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
-        long dEn = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
         if (dZn != 0)
             MoveZ_Analyser();
         if (dXn != 0 || dYn != 0)
@@ -356,7 +394,6 @@ static void shiftRightAllTheCommandsTillThis(int commandNumber)
 
 void smoothStop_Gcode(void)
 {
-
     int currentCommandNumber = lastCommandNumber();
     command_Gcode command = commandBuffer[number(currentCommandNumber)];
 
