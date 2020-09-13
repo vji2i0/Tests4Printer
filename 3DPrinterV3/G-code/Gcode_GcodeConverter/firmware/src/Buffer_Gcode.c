@@ -290,8 +290,12 @@ static void MoveZ_Analyser(void)
 }
 
 static const float HOME_COARSE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float HOME_COARSE_SPEED_Z_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
 static const float HOME_FINE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float HOME_FINE_SPEED_Z_STEPS_PER_SECOND = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
 static const long  HOME_FINE_STEPS_XY = HOME_FINE_DISTANCE*STEPS_PER_MM_XY;
+static const long  HOME_FINE_STEPS_Z = HOME_FINE_DISTANCE*STEPS_PER_MM_Z;
+
 
 static void HomeX_Analyser(void)
 {
@@ -363,6 +367,106 @@ static void HomeY_Analyser(void)
     command_Gcode command6 = {MOVE_COMMAND,      0, y, 0, 0,    0, v, 0, 0,    0, a, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command6);
 }
 
+static void HomeZ_Analyser(void)
+{
+    long dZn = getDescreteCommandBufferElement_Gcode(2).Zn;
+    long z; float v; float a;
+
+    long  L_HOME_Z = lroundf(pow(HOME_COARSE_SPEED_Z_STEPS_PER_SECOND,2)/(2*ACCELERATION_Z_STEPS_PER_SS));
+
+    z = 0;                          v = HOME_COARSE_SPEED_Z_STEPS_PER_SECOND;           a = 0;
+    command_Gcode command1 = {GO_HOME_Z_COMMAND, 0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command1);
+    z = -HOME_FINE_STEPS_Z;         v = -HOME_COARSE_SPEED_Z_STEPS_PER_SECOND;          a = 0;
+    command_Gcode command2 = {MOVE_COMMAND,      0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command2);
+    z = 0;                          v = HOME_FINE_SPEED_Z_STEPS_PER_SECOND;             a = 0;
+    command_Gcode command3 = {GO_HOME_Z_COMMAND, 0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command3);
+    if (dZn >= 0)
+        return;
+
+    if (abs(dZn) < 2*L_HOME_Z)
+    {
+        long  zStar = abs(lroundf(-0.25+(float)dZn/2));
+        float vStar = sqrtf(2*ACCELERATION_Z_STEPS_PER_SS*zStar);
+        z = -zStar;                 v = 0;                                              a = -ACCELERATION_Z_STEPS_PER_SS;
+        command_Gcode command4 = {MOVE_COMMAND,      0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command4);
+        z = dZn+zStar;              v = -vStar;                                         a = ACCELERATION_Z_STEPS_PER_SS;
+        command_Gcode command5 = {MOVE_COMMAND,      0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command5);
+        return;
+    }
+
+    z = -L_HOME_Z;              v = 0;                                              a = -ACCELERATION_Z_STEPS_PER_SS;
+    command_Gcode command4 = {MOVE_COMMAND,      0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command4);
+    z = dZn+2*L_HOME_Z;         v = -HOME_COARSE_SPEED_Z_STEPS_PER_SECOND;          a = 0;
+    command_Gcode command5 = {MOVE_COMMAND,      0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command5);
+    z = -L_HOME_Z;              v = -HOME_COARSE_SPEED_Z_STEPS_PER_SECOND;          a = ACCELERATION_Z_STEPS_PER_SS;
+    command_Gcode command6 = {MOVE_COMMAND,      0, 0, z, 0,    0, 0, v, 0,    0, 0, a, 0,   0, 0};     firstInCommandBuffer_Gcode(command6);
+}
+
+static void HomeXY_Analyser(void)
+{
+    long dXn = getDescreteCommandBufferElement_Gcode(2).Xn;
+    long dYn = getDescreteCommandBufferElement_Gcode(2).Yn;
+
+    long x; long y; float v; float a;   float vX; float vY; float aX; float aY;
+
+    x = 0;                      y = 0;                          v = -HOME_COARSE_SPEED_XY_STEPS_PER_SECOND;        a = 0;
+    command_Gcode command1 = {GO_HOME_XY_COMMAND, x, y, 0, 0,   v, v, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command1);
+    x = HOME_FINE_STEPS_XY;     y = HOME_FINE_STEPS_XY;         v = HOME_COARSE_SPEED_XY_STEPS_PER_SECOND;         a = 0;
+    command_Gcode command2 = {MOVE_COMMAND,       x, y, 0, 0,   v, v, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command2);
+    x = 0;                      y = 0;                          v = -HOME_FINE_SPEED_XY_STEPS_PER_SECOND;          a = 0;
+    command_Gcode command3 = {GO_HOME_XY_COMMAND, x, y, 0, 0,   v, v, 0, 0,    a, 0, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command3);
+
+    if (dXn == 0 && dYn == 0) return;
+    if (dXn <  0 || dYn <  0) return;
+
+    float distance_XY = sqrtf(pow(dXn,2)+pow(dYn,2));
+    float cosX = (float)dXn/distance_XY;    float targetSpeedX = HOME_COARSE_SPEED_XY_STEPS_PER_SECOND*cosX;  float accelerationX = ACCELERATION_XY_STEPS_PER_SS*cosX;
+    float cosY = (float)dYn/distance_XY;    float targetSpeedY = HOME_COARSE_SPEED_XY_STEPS_PER_SECOND*cosY;  float accelerationY = ACCELERATION_XY_STEPS_PER_SS*cosY;
+    float startDistance_XY = pow(HOME_COARSE_SPEED_XY_STEPS_PER_SECOND,2)/(2*ACCELERATION_XY_STEPS_PER_SS);
+    long l_HOME_X = lroundf(startDistance_XY*cosX);     long l_HOME_Y = lroundf(startDistance_XY*cosY);
+
+    if (distance_XY < 2*startDistance_XY)
+    {
+        long xStar = lroundf(0.25+(float)dXn/2);   float vStarX = cosX*sqrtf(2*ACCELERATION_XY_STEPS_PER_SS*distance_XY);
+        long yStar = lroundf(0.25+(float)dYn/2);   float vStarY = cosY*sqrtf(2*ACCELERATION_XY_STEPS_PER_SS*distance_XY);
+        x = xStar;              y = yStar;              vX = 0;                vY = 0;              aX = accelerationX;     aY = accelerationY;
+        command_Gcode command4 = {MOVE_COMMAND,      x, y, 0, 0,    vX, vY, 0, 0,    aX, aY, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command4);
+        x = dXn-xStar;          y = dYn-yStar;          vX = vStarX;           vY = vStarY;         aX = -accelerationX;    aY = -accelerationY;
+        command_Gcode command5 = {MOVE_COMMAND,      x, y, 0, 0,    vX, vY, 0, 0,    aX, aY, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command5);
+        return;
+    }
+
+    x = l_HOME_X;           y = l_HOME_Y;           vX = 0;                vY = 0;                aX = accelerationX;     aY = accelerationY;
+    command_Gcode command4 = {MOVE_COMMAND,      x, y, 0, 0,    vX, vY, 0, 0,    aX, aY, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command4);
+    x = dXn-2*l_HOME_X;     y = dYn-2*l_HOME_Y;     vX = targetSpeedX;     vY = targetSpeedY;     aX = 0;                 aY = 0;
+    command_Gcode command5 = {MOVE_COMMAND,      x, y, 0, 0,    vX, vY, 0, 0,    aX, aY, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command5);
+    x = l_HOME_X;           y = l_HOME_Y;           vX = targetSpeedX;     vY = targetSpeedY;     aX = -accelerationX;    aY = -accelerationY;
+    command_Gcode command6 = {MOVE_COMMAND,      x, y, 0, 0,    vX, vY, 0, 0,    aX, aY, 0, 0,   0, 0};     firstInCommandBuffer_Gcode(command6);
+}
+
+static void SetExtrTemp_Analyser(void)
+{
+    float t  = getDescreteCommandBufferElement_Gcode(2).extrT;
+    command_Gcode command = {HEAT_EXTRUDER_COMMAND, 0, 0, 0, 0,   0, 0, 0, 0,    0, 0, 0, 0,   t, 0};     firstInCommandBuffer_Gcode(command);
+}
+
+static void SetBedTemp_Analyser(void)
+{
+    float t  = getDescreteCommandBufferElement_Gcode(2).bedT;
+    command_Gcode command = {HEAT_BED_COMMAND, 0, 0, 0, 0,   0, 0, 0, 0,    0, 0, 0, 0,   0, t};     firstInCommandBuffer_Gcode(command);
+}
+
+static void WaitExtrTemp_Analyser(void)
+{
+    float t  = getDescreteCommandBufferElement_Gcode(2).extrT;
+    command_Gcode command = {WAIT_HEAT_EXTRUDER_COMMAND, 0, 0, 0, 0,   0, 0, 0, 0,    0, 0, 0, 0,   t, 0};     firstInCommandBuffer_Gcode(command);
+}
+
+static void WaitBedTemp_Analyser(void)
+{
+    float t  = getDescreteCommandBufferElement_Gcode(2).bedT;
+    command_Gcode command = {WAIT_HEAT_BED_COMMAND, 0, 0, 0, 0,   0, 0, 0, 0,    0, 0, 0, 0,   0, t};     firstInCommandBuffer_Gcode(command);
+}
 
 void descreteCommandAnalyser_Gcode(void)
 {
@@ -371,9 +475,6 @@ void descreteCommandAnalyser_Gcode(void)
     long dYn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
     long dZn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
     long dEn = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
-
-    if (typeOfCommand == GO_HOME_X_COMMAND) {HomeX_Analyser(); return;}
-    if (typeOfCommand == GO_HOME_Y_COMMAND) {HomeY_Analyser(); return;}
 
     if (typeOfCommand == MOVE_COMMAND)
     {
@@ -388,7 +489,24 @@ void descreteCommandAnalyser_Gcode(void)
             MoveE_Analyser();
         return;
     }
+
+    if (typeOfCommand == GO_HOME_X_COMMAND)   {HomeX_Analyser();  return;}
+    if (typeOfCommand == GO_HOME_Y_COMMAND)   {HomeY_Analyser();  return;}
+    if (typeOfCommand == GO_HOME_Z_COMMAND)   {HomeZ_Analyser();  return;}
+    if (typeOfCommand == GO_HOME_XY_COMMAND)  {HomeXY_Analyser(); return;}
+    if (typeOfCommand == GO_HOME_XZ_COMMAND)  {HomeZ_Analyser();  HomeX_Analyser();  return;}
+    if (typeOfCommand == GO_HOME_YZ_COMMAND)  {HomeZ_Analyser();  HomeY_Analyser();  return;}
+    if (typeOfCommand == GO_HOME_XYZ_COMMAND) {HomeZ_Analyser();  HomeXY_Analyser(); return;}
+
+    if (typeOfCommand == HEAT_EXTRUDER_COMMAND)   {SetExtrTemp_Analyser();  return;}
+    if (typeOfCommand == HEAT_BED_COMMAND)        {SetBedTemp_Analyser();   return;}
+
+    if (typeOfCommand == WAIT_HEAT_EXTRUDER_COMMAND)   {WaitExtrTemp_Analyser();  return;}
+    if (typeOfCommand == WAIT_HEAT_BED_COMMAND)        {WaitBedTemp_Analyser();   return;}
 }
+
+
+
 
 static int lastCommandNumber(void)
 {
@@ -427,10 +545,18 @@ static void shiftRightAllTheCommandsTillThis(int commandNumber)
     }
 }
 
+static _Bool smoothable(commandType_Gcode commandType)
+{
+    if( commandType == MOVE_COMMAND) return true;
+    return false;
+}
+
 void smoothStop_Gcode(void)
 {
     int currentCommandNumber = lastCommandNumber();
     command_Gcode command = commandBuffer[number(currentCommandNumber)];
+
+    if (!smoothable(command.type)) return;
 
     float speedAtTheEnd = 0;
     float speedAtTheStart = sqrtf(pow(command.FnX,2)+pow(command.FnY,2));
