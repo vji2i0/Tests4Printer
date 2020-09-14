@@ -16,4 +16,7 @@ enum {CRITICAL_ANGLE_XY = 20};
 enum {HOME_COARSE_SPEED = 2000, HOME_FINE_SPEED = 500};
 enum {HOME_FINE_DISTANCE = 5};
 
+#define TIMER_PERIOD_S 0.001;
+
+
 #endif
