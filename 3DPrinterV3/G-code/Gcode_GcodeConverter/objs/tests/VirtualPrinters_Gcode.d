@@ -16,7 +16,7 @@ objs/.//tests/VirtualPrinters_Gcode.o: tests/VirtualPrinters_Gcode.cpp \
  ../../../cpputest-3.7.2/include/CppUTest/MemoryLeakDetectorNewMacros.h \
  firmware/inc/VirtualPrinters_Gcode.h firmware/inc/Config_Gcode.h \
  firmware/inc/Buffer_Gcode.h firmware/inc/Descritization_Gcode.h \
- firmware/inc/GcodeConverter_Gcode.h
+ firmware/inc/GcodeConverter_Gcode.h firmware/inc/Buffer_Gcode.h
 
 ../../../cpputest-3.7.2/include/CppUTest/MemoryLeakDetectorNewMacros.h:
 
@@ -57,3 +57,5 @@ firmware/inc/Buffer_Gcode.h:
 firmware/inc/Descritization_Gcode.h:
 
 firmware/inc/GcodeConverter_Gcode.h:
+
+firmware/inc/Buffer_Gcode.h:

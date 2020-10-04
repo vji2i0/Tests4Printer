@@ -5,7 +5,7 @@
 #include "Descritization_Gcode.h"
 #include "stdbool.h"
 
-const descreteCommand_Gcode defaultDescreteCommand = {EMPTY_COMMAND};
+extern const descreteCommand_Gcode defaultDescreteCommand;
 
 void createDescreteCommandBuffer_Gcode(void);
 void addElementToDescreteCommandBuffer_Gcode(descreteCommand_Gcode descreteCommand);
@@ -23,7 +23,7 @@ typedef struct
     float extrT, bedT;
 } command_Gcode;
 
-const command_Gcode defaultCommand = {EMPTY_COMMAND};
+extern const command_Gcode defaultCommand;
 
 void createCommandBuffer_Gcode(void);
 

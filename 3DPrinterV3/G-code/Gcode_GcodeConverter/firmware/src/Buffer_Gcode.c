@@ -3,6 +3,9 @@
 #include "stdbool.h"
 #include "math.h"
 
+const descreteCommand_Gcode defaultDescreteCommand = {EMPTY_COMMAND};
+const command_Gcode defaultCommand = {EMPTY_COMMAND};
+
 
 static descreteCommand_Gcode descreteBuffer[3];
 
