@@ -1,5 +1,7 @@
 #include "VirtualPrinters_Gcode.h"
 
+#include "Fake_Motors.h"
+
 #include "math.h"
 
 const float evaluationPeriod_Gcode = 0.001;
@@ -64,6 +66,26 @@ static _Bool moveComleted(void)
 {
     return currentCommand.xDone && currentCommand.yDone && currentCommand.zDone && currentCommand.eDone;
 }
+static void makeStepX_Gcode(void)
+{
+    discretePrinter.X += currentCommand.xDirection;
+    doStepX_Motors(currentCommand.xDirection);
+}
+static void makeStepY_Gcode(void)
+{
+    discretePrinter.Y += currentCommand.yDirection;
+    doStepY_Motors(currentCommand.yDirection);
+}
+static void makeStepZ_Gcode(void)
+{
+    discretePrinter.Z += currentCommand.zDirection;
+    doStepZ_Motors(currentCommand.zDirection);
+}
+static void makeStepE_Gcode(void)
+{
+    discretePrinter.E += currentCommand.eDirection;
+    doStepE_Motors(currentCommand.eDirection);
+}
 
 _Bool evaluatePrinter_Gcode(void)
 {
@@ -73,28 +95,28 @@ _Bool evaluatePrinter_Gcode(void)
     {
         continiuosPrinter.vX += currentCommand.command.AnX*evaluationPeriod_Gcode;
         continiuosPrinter.X  += continiuosPrinter.vX*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.X - (float)discretePrinter.X) != 0) discretePrinter.X += currentCommand.xDirection;
+        if (lroundf(continiuosPrinter.X - (float)discretePrinter.X) != 0) makeStepX_Gcode();
         if (discretePrinter.X == currentCommand.command.dXn) currentCommand.xDone = true;
     }
     if (!currentCommand.yDone)
     {
         continiuosPrinter.vY += currentCommand.command.AnY*evaluationPeriod_Gcode;
         continiuosPrinter.Y  += continiuosPrinter.vY*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.Y - (float)discretePrinter.Y) != 0) discretePrinter.Y += currentCommand.yDirection;
+        if (lroundf(continiuosPrinter.Y - (float)discretePrinter.Y) != 0) makeStepY_Gcode();
         if (discretePrinter.Y == currentCommand.command.dYn) currentCommand.yDone = true;
     }
     if (!currentCommand.zDone)
     {
         continiuosPrinter.vZ += currentCommand.command.AnZ*evaluationPeriod_Gcode;
         continiuosPrinter.Z  += continiuosPrinter.vZ*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0) discretePrinter.Z += currentCommand.zDirection;
+        if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0) makeStepZ_Gcode();
         if (discretePrinter.Z == currentCommand.command.dZn) currentCommand.zDone = true;
     }
     if (!currentCommand.eDone)
     {
         continiuosPrinter.vE += currentCommand.command.AnE*evaluationPeriod_Gcode;
         continiuosPrinter.E  += continiuosPrinter.vE*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.E - (float)discretePrinter.E) != 0) discretePrinter.E += currentCommand.eDirection;
+        if (lroundf(continiuosPrinter.E - (float)discretePrinter.E) != 0) makeStepE_Gcode();
         if (discretePrinter.E == currentCommand.command.dEn) currentCommand.eDone = true;
     }
     return false;
