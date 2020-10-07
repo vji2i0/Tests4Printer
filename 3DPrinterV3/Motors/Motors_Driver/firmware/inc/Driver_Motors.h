@@ -2,6 +2,19 @@
 #define DRIVER_MOTORS
 
 
+enum {IDLE_MOTORS, FOREWARD_MOTORS, BACKWARD_MOTORS, STEPON_MOTORS, STEPOFF_MOTORS};
+
+void create_Motors(void);
+
+void enable_Motors(void);
+void disable_Motors(void);
+
+void doStepX_Motors(long direction);
+void doStepY_Motors(long direction);
+void doStepZ_Motors(long direction);
+void doStepE_Motors(long direction);
+
+void evaluate_Motors(void);
 
 
 

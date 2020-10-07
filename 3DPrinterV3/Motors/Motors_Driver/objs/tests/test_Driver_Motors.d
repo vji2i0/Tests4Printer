@@ -16,7 +16,7 @@ objs/.//tests/test_Driver_Motors.o: tests/test_Driver_Motors.cpp \
  ../../../cpputest-3.7.2/include/CppUTest/MemoryLeakDetectorNewMacros.h \
  ../../../cpputest-3.7.2/include/CppUTestExt/MockSupport_c.h \
  ../../../cpputest-3.7.2/include/CppUTest/StandardCLibrary.h \
- firmware/inc/Driver_Motors.h
+ firmware/inc/Driver_Motors.h firmware/inc/GPIO_Motors.h
 
 ../../../cpputest-3.7.2/include/CppUTest/MemoryLeakDetectorNewMacros.h:
 
@@ -53,3 +53,5 @@ objs/.//tests/test_Driver_Motors.o: tests/test_Driver_Motors.cpp \
 ../../../cpputest-3.7.2/include/CppUTest/StandardCLibrary.h:
 
 firmware/inc/Driver_Motors.h:
+
+firmware/inc/GPIO_Motors.h:
