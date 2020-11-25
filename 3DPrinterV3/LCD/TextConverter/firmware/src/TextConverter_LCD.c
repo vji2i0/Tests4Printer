@@ -1,13 +1,16 @@
 #include "TextConverter_LCD.h"
+
 #include "FakeInterface_LCD.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <wchar.h>
+#include <stdlib.h>
 
-const static wchar_t EMPTY_STRING[] = L"                    ";
+const wchar_t EMPTY_STRING[] = L"                    ";
 
 static wchar_t toPrint_LCD[NUMBEROFLINES_TEXTCONVERTER_LCD][LINELENGTH_TEXTCONVERTER_LCD];
 static wchar_t text_LCD[NUMBEROFLINES_TEXTCONVERTER_LCD][MAXTEXTLENGTH+1];

@@ -3,6 +3,7 @@
 #include "stdint.h"
 #include <wchar.h>
 #include "stdbool.h"
+#include <stdlib.h>
 
 static menuNode* pMenuNode = NULL;
 

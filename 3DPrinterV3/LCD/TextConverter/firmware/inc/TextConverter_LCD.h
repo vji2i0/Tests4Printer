@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <wchar.h>
 
 enum{LINELENGTH_TEXTCONVERTER_LCD = 20, NUMBEROFLINES_TEXTCONVERTER_LCD = 4, MAXTEXTLENGTH = 100};
+
+extern const wchar_t EMPTY_STRING[];
 
 void create_TextConverter_LCD(void);
 const wchar_t* getLine_TextConverter_LCD(int line);

@@ -1,20 +1,23 @@
 #include "MainMenu_Menu.h"
 
 #include "Constructor_Menu.h"
+#include "Fake_FunctionsForButtons.h"
+
 #include "stdint.h"
+#include "stdio.h"
 #include <wchar.h>
 #include "stdbool.h"
 
-#include "Fake_FunctionsForButtons.h"
+
 
 
 void setMainMenu_Menu(void)
 {
     createFirstNode_Menu(L"MAIN MENU", L" Print");
-    setFunctionUp(NULL);
+    setFunctionUp(&simpleNavigationUp_Menu);
     setFunctionDown(&simpleNavigationDown_Menu);
     setFunctionOk(&printOk_Menu);
-    setFunctionBack(NULL);
+    setFunctionBack(&emptyFunction_Menu);
 
 
     createDownNode_Menu(L" Change filament");
@@ -22,7 +25,7 @@ void setMainMenu_Menu(void)
     setFunctionUp(&simpleNavigationUp_Menu);
     setFunctionDown(&simpleNavigationDown_Menu);
     setFunctionOk(&changeFilamentOk_Menu);
-    setFunctionBack(NULL);
+    setFunctionBack(&emptyFunction_Menu);
 
         createRightNode_Menu(L"CHANGE FILAMENT", L" Set the temperature");
         moveRight_Menu();
@@ -38,28 +41,28 @@ void setMainMenu_Menu(void)
     setFunctionUp(&simpleNavigationUp_Menu);
     setFunctionDown(&simpleNavigationDown_Menu);
     setFunctionOk(&simpleNavigationOk_Menu);
-    setFunctionBack(NULL);
+    setFunctionBack(&emptyFunction_Menu);
 
         createRightNode_Menu(L"LANGUAGE", L" English");
         moveRight_Menu();
-        setFunctionUp(NULL);
+        setFunctionUp(&emptyFunction_Menu);
         setFunctionDown(&simpleNavigationDown_Menu);
         setFunctionOk(&englishOk_Menu);
-        setFunctionBack(&englishBack_Menu);
+        setFunctionBack(&simpleNavigationBack_Menu);
 
         createDownNode_Menu(L" Russian");
         moveDown_Menu();
         setFunctionUp(&simpleNavigationUp_Menu);
-        setFunctionDown(NULL);
+        setFunctionDown(&emptyFunction_Menu);
         setFunctionOk(&russianOk_Menu);
-        setFunctionBack(&russianBack_Menu);
+        setFunctionBack(&simpleNavigationBack_Menu);
 
         moveLeft_Menu();
 
     createDownNode_Menu(L" Help");
     moveDown_Menu();
     setFunctionUp(&simpleNavigationUp_Menu);
-    setFunctionDown(NULL);
+    setFunctionDown(&simpleNavigationDown_Menu);
     setFunctionOk(&helpOk_Menu);
     setFunctionBack(&helpBack_Menu);
 

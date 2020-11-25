@@ -2,6 +2,7 @@
 
 #include "stdbool.h"
 #include "math.h"
+#include <stdlib.h>
 
 const descreteCommand_Gcode defaultDescreteCommand = {EMPTY_COMMAND};
 const command_Gcode defaultCommand = {EMPTY_COMMAND};

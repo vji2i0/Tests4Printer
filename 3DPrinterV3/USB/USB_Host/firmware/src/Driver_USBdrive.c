@@ -179,11 +179,12 @@ const TCHAR* getLongName_USBdrive(void) { return (const TCHAR*) fileInformation.
 
 static void convertLongNameToWideLongName(wchar_t* wideLongName, const TCHAR* longName)
 {
+    wideLongName[0] = *L" ";
     int letterNember;
     for (letterNember = 0; letterNember < MAX_WIDE_NAME_LENGTH; letterNember++)
-        wideLongName[letterNember] = *L"\0";
+        wideLongName[letterNember+1] = *L"\0";
     for (letterNember = 0; letterNember < MAX_WIDE_NAME_LENGTH; letterNember++)
-        wideLongName[letterNember] = TCHAR2wchar_t(longName[letterNember]);
+        wideLongName[letterNember+1] = TCHAR2wchar_t(longName[letterNember]);
 }
 
 static wchar_t outputWideName[MAX_WIDE_NAME_LENGTH];

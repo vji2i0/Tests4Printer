@@ -1,4 +1,5 @@
 #include "Descritization_Gcode.h"
+
 #include <math.h>
 
 static descreteCommand_Gcode descreteCommand;

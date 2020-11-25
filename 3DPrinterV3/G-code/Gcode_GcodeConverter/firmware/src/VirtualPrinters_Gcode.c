@@ -62,7 +62,7 @@ void sendCommandToPrinter_Gcode(command_Gcode command)
     continiuosPrinter.vE = command.FnE; currentCommand.eDirection = sign(command.dEn);  if (command.dEn != 0) currentCommand.eDone = false;
 }
 
-static _Bool moveComleted(void)
+_Bool moveComleted(void)
 {
     return currentCommand.xDone && currentCommand.yDone && currentCommand.zDone && currentCommand.eDone;
 }

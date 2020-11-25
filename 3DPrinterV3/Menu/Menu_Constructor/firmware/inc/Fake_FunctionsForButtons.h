@@ -27,4 +27,14 @@ void helpOk_Menu(void);
 void helpBack_Menu(void);
 
 
+
+void emptyFunction_Menu(void);
+
+void openDirectory_Menu(void);
+void closeDirectory_Menu(void);
+
+void runGcode_Menu(void);
+
+
+
 #endif
