@@ -16,10 +16,8 @@ objs/.//tests/test_Driver_USBdrive.o: tests/test_Driver_USBdrive.cpp \
  ../../../cpputest-3.7.2/include/CppUTest/MemoryLeakDetectorNewMacros.h \
  ../../../cpputest-3.7.2/include/CppUTestExt/MockSupport_c.h \
  ../../../cpputest-3.7.2/include/CppUTest/StandardCLibrary.h \
- /home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Driver_USBdrive.h \
- /home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Mock_ff.h \
- /home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Mock_ff.h \
- /home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Fake_fatfs.h
+ firmware/inc/Driver_USBdrive.h firmware/inc/Mock_ff.h \
+ firmware/inc/Mock_ff.h firmware/inc/Fake_fatfs.h
 
 ../../../cpputest-3.7.2/include/CppUTest/MemoryLeakDetectorNewMacros.h:
 
@@ -55,10 +53,10 @@ objs/.//tests/test_Driver_USBdrive.o: tests/test_Driver_USBdrive.cpp \
 
 ../../../cpputest-3.7.2/include/CppUTest/StandardCLibrary.h:
 
-/home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Driver_USBdrive.h:
+firmware/inc/Driver_USBdrive.h:
 
-/home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Mock_ff.h:
+firmware/inc/Mock_ff.h:
 
-/home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Mock_ff.h:
+firmware/inc/Mock_ff.h:
 
-/home/vji2i0/TDD/3DPrinterV3/USB/USB_Host/firmware/inc/Fake_fatfs.h:
+firmware/inc/Fake_fatfs.h:

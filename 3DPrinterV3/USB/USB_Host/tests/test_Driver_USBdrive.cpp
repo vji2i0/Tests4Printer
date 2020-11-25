@@ -290,8 +290,8 @@ TEST(Driver_USBdrive, open_directory_get_name_and_long_name_and_wide_long_name_o
 
     STRCMP_EQUAL("dir1", getName_USBdrive());
     STRCMP_EQUAL("dir1", getLongName_USBdrive());
-    WSTRCMP_EQUAL(L"dir1", getWideLongName_USBdrive());
-    WSTRCMP_EQUAL(getWideLongName_USBdrive(), L"dir1");
+    WSTRCMP_EQUAL(L" dir1", getWideLongName_USBdrive());
+    WSTRCMP_EQUAL(getWideLongName_USBdrive(), L" dir1");
 }
 
 TEST(Driver_USBdrive, open_directory_get_type_of_item)
