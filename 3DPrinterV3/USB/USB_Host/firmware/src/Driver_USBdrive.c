@@ -14,6 +14,7 @@ static FATFS USBDISKFatFs;
 static DIR directory;
 static FILINFO fileInformation;
 static FIL file;
+static TCHAR fname_arr[_MAX_LFN];
 
 
 void createDriver_USBdrive(void)
@@ -22,6 +23,7 @@ void createDriver_USBdrive(void)
     memcpy(path, zeroPath_USBdriver, PATH_LENGTH);
     sprintf(fileInformation.fname, "%s", "");
     fileInformation.lfsize = _MAX_LFN;
+    fileInformation.lfname = fname_arr;
     sprintf(fileInformation.lfname, "%s", "");
 }
 

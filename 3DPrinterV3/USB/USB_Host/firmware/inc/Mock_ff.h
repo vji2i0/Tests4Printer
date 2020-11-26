@@ -112,7 +112,7 @@ typedef struct {
     WORD    ftime;          /* Last modified time */
     BYTE    fattrib;        /* Attribute */
     TCHAR   fname[13];      /* Short file name (8.3 format) */
-    TCHAR   lfname[_MAX_LFN];           /* Pointer to the LFN buffer */
+    TCHAR*  lfname;           /* Pointer to the LFN buffer */
     UINT    lfsize;         /* Size of LFN buffer in TCHAR */
 } FILINFO;
 
