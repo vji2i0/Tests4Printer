@@ -1,0 +1,8 @@
+3DPrinterV3/cpputest-3.7.2/*
+3DPrinterV3/G-code/Gcode_GcodeConverter/objs/*
+3DPrinterV3/LCD/LCD_Driver/objs/*
+3DPrinterV3/LCD/LCD_Interface/objs/*
+3DPrinterV3/LCD/TextConverter/objs/*
+3DPrinterV3/Menu/Menu_Constructor/objs/*
+3DPrinterV3/Motors/Motors_Driver/objs/*
+3DPrinterV3/USB/USB_Host/objs/*
