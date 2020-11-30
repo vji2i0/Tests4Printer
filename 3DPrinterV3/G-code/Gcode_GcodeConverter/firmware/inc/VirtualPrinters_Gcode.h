@@ -14,6 +14,12 @@ long getCurrentY_Gcode(void);
 long getCurrentZ_Gcode(void);
 long getCurrentE_Gcode(void);
 
+float getCurrentSpeedX_Gcode(void);
+float getCurrentSpeedY_Gcode(void);
+float getCurrentSpeedZ_Gcode(void);
+float getCurrentSpeedE_Gcode(void);
+
+
 void sendCommandToPrinter_Gcode(command_Gcode command);
 
 _Bool evaluatePrinter_Gcode(void);

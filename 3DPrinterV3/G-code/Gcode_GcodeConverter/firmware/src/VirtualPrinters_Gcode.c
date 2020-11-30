@@ -45,6 +45,12 @@ long getCurrentY_Gcode(void) {return discretePrinter.Y;}
 long getCurrentZ_Gcode(void) {return discretePrinter.Z;}
 long getCurrentE_Gcode(void) {return discretePrinter.E;}
 
+float getCurrentSpeedX_Gcode(void) {return continiuosPrinter.vX;}
+float getCurrentSpeedY_Gcode(void) {return continiuosPrinter.vY;}
+float getCurrentSpeedZ_Gcode(void) {return continiuosPrinter.vZ;}
+float getCurrentSpeedE_Gcode(void) {return continiuosPrinter.vE;}
+
+
 static long sign(long dLn)
 {
     if (dLn > 0) return 1;
