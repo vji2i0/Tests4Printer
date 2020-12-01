@@ -188,8 +188,11 @@ TEST(Driver_Motors, step_foreward_along_x_and_y)
     evaluate_Motors();
 }
 
-TEST(Driver_Motors, two_steps_do_not_interfere)
+TEST(Driver_Motors, two_sequential_steps_along_x)
 {
+    mock_c()->expectOneCall("ForwardX");
+    mock_c()->expectOneCall("StepOnX");
+    mock_c()->expectOneCall("StepOffX");
     mock_c()->expectOneCall("ForwardX");
     mock_c()->expectOneCall("StepOnX");
     mock_c()->expectOneCall("StepOffX");
@@ -198,7 +201,84 @@ TEST(Driver_Motors, two_steps_do_not_interfere)
     evaluate_Motors();
     doStepX_Motors(1);
     evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, two_sequential_steps_along_x_backward)
+{
+    mock_c()->expectOneCall("ForwardX");
+    mock_c()->expectOneCall("StepOnX");
+    mock_c()->expectOneCall("StepOffX");
+    mock_c()->expectOneCall("BackwardX");
+    mock_c()->expectOneCall("StepOnX");
+    mock_c()->expectOneCall("StepOffX");
+
     doStepX_Motors(1);
+    evaluate_Motors();
+    doStepX_Motors(-1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, two_sequential_steps_along_y)
+{
+    mock_c()->expectOneCall("ForwardY");
+    mock_c()->expectOneCall("StepOnY");
+    mock_c()->expectOneCall("StepOffY");
+    mock_c()->expectOneCall("ForwardY");
+    mock_c()->expectOneCall("StepOnY");
+    mock_c()->expectOneCall("StepOffY");
+
+    doStepY_Motors(1);
+    evaluate_Motors();
+    doStepY_Motors(1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, two_sequential_steps_along_z)
+{
+    mock_c()->expectOneCall("ForwardZ");
+    mock_c()->expectOneCall("StepOnZ");
+    mock_c()->expectOneCall("StepOffZ");
+    mock_c()->expectOneCall("ForwardZ");
+    mock_c()->expectOneCall("StepOnZ");
+    mock_c()->expectOneCall("StepOffZ");
+
+    doStepZ_Motors(1);
+    evaluate_Motors();
+    doStepZ_Motors(1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, two_sequential_steps_along_e)
+{
+    mock_c()->expectOneCall("ForwardE");
+    mock_c()->expectOneCall("StepOnE");
+    mock_c()->expectOneCall("StepOffE");
+    mock_c()->expectOneCall("ForwardE");
+    mock_c()->expectOneCall("StepOnE");
+    mock_c()->expectOneCall("StepOffE");
+
+    doStepE_Motors(1);
+    evaluate_Motors();
+    doStepE_Motors(1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
     evaluate_Motors();
     evaluate_Motors();
 }

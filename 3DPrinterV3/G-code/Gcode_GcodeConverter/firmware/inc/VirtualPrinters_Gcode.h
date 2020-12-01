@@ -19,6 +19,11 @@ float getCurrentSpeedY_Gcode(void);
 float getCurrentSpeedZ_Gcode(void);
 float getCurrentSpeedE_Gcode(void);
 
+long getCurrentCommandX_Gcode(void);
+long getCurrentCommandY_Gcode(void);
+long getCurrentCommandZ_Gcode(void);
+long getCurrentCommandE_Gcode(void);
+
 
 void sendCommandToPrinter_Gcode(command_Gcode command);
 

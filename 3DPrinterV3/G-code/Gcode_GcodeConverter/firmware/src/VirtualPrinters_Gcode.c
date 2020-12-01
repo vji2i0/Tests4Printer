@@ -50,6 +50,11 @@ float getCurrentSpeedY_Gcode(void) {return continiuosPrinter.vY;}
 float getCurrentSpeedZ_Gcode(void) {return continiuosPrinter.vZ;}
 float getCurrentSpeedE_Gcode(void) {return continiuosPrinter.vE;}
 
+long getCurrentCommandX_Gcode(void) {return currentCommand.command.dXn;}
+long getCurrentCommandY_Gcode(void) {return currentCommand.command.dYn;}
+long getCurrentCommandZ_Gcode(void) {return currentCommand.command.dZn;}
+long getCurrentCommandE_Gcode(void) {return currentCommand.command.dEn;}
+
 
 static long sign(long dLn)
 {

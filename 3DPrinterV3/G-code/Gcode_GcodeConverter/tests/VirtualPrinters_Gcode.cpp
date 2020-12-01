@@ -37,7 +37,9 @@ const command_Gcode moveEwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 0, 0, 
 const command_Gcode moveEwithoutAccelerationNegative =  {MOVE_COMMAND, 0, 0, 0, -100,   0, 0, 0, -10,    0, 0, 0,   0, 0};
 const command_Gcode moveXYwithoutAccelerationPositive = {MOVE_COMMAND, 200, 100, 0, 0,    20, 10, 0, 0,    0, 0, 0,   0, 0};
 const command_Gcode moveXYwithoutAccelerationNegative = {MOVE_COMMAND, -200, 100, 0, 0,    -20, 10, 0, 0,    0, 0, 0,   0, 0};
-
+const command_Gcode moveXwithAccelerationPositive =     {MOVE_COMMAND, 100, 0, 0, 0,     0, 0, 0, 0,    10, 0, 0,   0, 0};
+const command_Gcode moveXwithAccelerationNegative =     {MOVE_COMMAND, -800, 0, 0, 0,    -600, 0, 0, 0,    100, 0, 0,   0, 0};
+const command_Gcode moveXwithAccelerationNegative2 =    {MOVE_COMMAND, -1300, 0, 0, 0,   -677, 0, 0, 0,    101, 0, 0,   0, 0};
 
 TEST_GROUP(VirtualPrinters_Gcode)
 {
@@ -141,4 +143,29 @@ TEST(VirtualPrinters_Gcode, move_x_y_without_acceleration_sequential)
     while (!evaluatePrinter_Gcode()) {}
     CHECK_EQUAL(moveYwithoutAccelerationPositive.dXn, getCurrentX_Gcode());
     CHECK_EQUAL(moveYwithoutAccelerationPositive.dYn, getCurrentY_Gcode());
+}
+
+TEST(VirtualPrinters_Gcode, move_x_with_acceleration_positive)
+{
+    sendCommandToPrinter_Gcode(moveXwithAccelerationPositive);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveXwithAccelerationPositive.dXn, getCurrentX_Gcode());
+}
+
+TEST(VirtualPrinters_Gcode, move_x_with_acceleration_negative)
+{
+    sendCommandToPrinter_Gcode(moveXwithAccelerationNegative);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveXwithAccelerationNegative.dXn, getCurrentX_Gcode());
+}
+
+TEST(VirtualPrinters_Gcode, move_x_with_acceleration_sequential_commands)
+{
+    sendCommandToPrinter_Gcode(moveXwithAccelerationNegative);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveXwithAccelerationNegative.dXn, getCurrentX_Gcode());
+
+    sendCommandToPrinter_Gcode(moveXwithAccelerationNegative2);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveXwithAccelerationNegative2.dXn, getCurrentX_Gcode());
 }

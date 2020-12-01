@@ -3,6 +3,7 @@
 #include "GPIO_Motors.h"
 
 static int motorXstate, motorYstate, motorZstate, motorEstate;
+static int motorXstateBuffer, motorYstateBuffer, motorZstateBuffer, motorEstateBuffer;
 
 
 void create_Motors(void)
@@ -11,6 +12,11 @@ void create_Motors(void)
     motorYstate = IDLE_MOTORS;
     motorZstate = IDLE_MOTORS;
     motorEstate = IDLE_MOTORS;
+
+    motorXstateBuffer = IDLE_MOTORS;
+    motorYstateBuffer = IDLE_MOTORS;
+    motorZstateBuffer = IDLE_MOTORS;
+    motorEstateBuffer = IDLE_MOTORS;
 }
 
 void enable_Motors(void)
@@ -31,30 +37,51 @@ void disable_Motors(void)
 
 void doStepX_Motors(long direction)
 {
-    if (motorXstate != IDLE_MOTORS)   return;
-    if (direction == 1)  { motorXstate = FOREWARD_MOTORS; return; }
-    if (direction == -1) { motorXstate = BACKWARD_MOTORS; return; }
+    if (motorXstate == IDLE_MOTORS)
+    {
+        if (direction == 1)  { motorXstate = FOREWARD_MOTORS; return; }
+        if (direction == -1) { motorXstate = BACKWARD_MOTORS; return; }
+    }
+    if (direction == 1)  { motorXstateBuffer = FOREWARD_MOTORS; return; }
+    if (direction == -1) { motorXstateBuffer = BACKWARD_MOTORS; return; }
 }
 
 void doStepY_Motors(long direction)
 {
-    if (motorYstate != IDLE_MOTORS)   return;
-    if (direction == 1)  { motorYstate = FOREWARD_MOTORS; return; }
-    if (direction == -1) { motorYstate = BACKWARD_MOTORS; return; }
+    if (motorYstate == IDLE_MOTORS)
+    {
+        if (direction == 1)  { motorYstate = FOREWARD_MOTORS; return; }
+        if (direction == -1) { motorYstate = BACKWARD_MOTORS; return; }
+    }
+    if (direction == 1)  { motorYstateBuffer = FOREWARD_MOTORS; return; }
+    if (direction == -1) { motorYstateBuffer = BACKWARD_MOTORS; return; }
 }
 
 void doStepZ_Motors(long direction)
 {
-    if (motorZstate != IDLE_MOTORS)   return;
-    if (direction == 1)  { motorZstate = FOREWARD_MOTORS; return; }
-    if (direction == -1) { motorZstate = BACKWARD_MOTORS; return; }
+    if (motorZstate == IDLE_MOTORS)
+    {
+        if (direction == 1)  { motorZstate = FOREWARD_MOTORS; return; }
+        if (direction == -1) { motorZstate = BACKWARD_MOTORS; return; }
+    }
+    if (direction == 1)  { motorZstateBuffer = FOREWARD_MOTORS; return; }
+    if (direction == -1) { motorZstateBuffer = BACKWARD_MOTORS; return; }
 }
 
 void doStepE_Motors(long direction)
 {
+    if (motorEstate == IDLE_MOTORS)
+    {
+        if (direction == 1)  { motorEstate = FOREWARD_MOTORS; return; }
+        if (direction == -1) { motorEstate = BACKWARD_MOTORS; return; }
+    }
+    if (direction == 1)  { motorEstateBuffer = FOREWARD_MOTORS; return; }
+    if (direction == -1) { motorEstateBuffer = BACKWARD_MOTORS; return; }
+/*
     if (motorEstate != IDLE_MOTORS)   return;
     if (direction == 1)  { motorEstate = FOREWARD_MOTORS; return; }
     if (direction == -1) { motorEstate = BACKWARD_MOTORS; return; }
+*/
 }
 
 void evaluate_Motors(void)
@@ -64,7 +91,7 @@ void evaluate_Motors(void)
         case FOREWARD_MOTORS:   ForwardX_Motors();  motorXstate = STEPON_MOTORS;    break;
         case BACKWARD_MOTORS:   BackwardX_Motors(); motorXstate = STEPON_MOTORS;    break;
         case STEPON_MOTORS:     StepOnX_Motors();   motorXstate = STEPOFF_MOTORS;   break;
-        case STEPOFF_MOTORS:    StepOffX_Motors();  motorXstate = IDLE_MOTORS;      break;
+        case STEPOFF_MOTORS:    StepOffX_Motors();  motorXstate = motorXstateBuffer; motorXstateBuffer = IDLE_MOTORS; break;
         default:                                    motorXstate = IDLE_MOTORS;      break;
     }
 
@@ -73,7 +100,7 @@ void evaluate_Motors(void)
         case FOREWARD_MOTORS:   ForwardY_Motors();  motorYstate = STEPON_MOTORS;    break;
         case BACKWARD_MOTORS:   BackwardY_Motors(); motorYstate = STEPON_MOTORS;    break;
         case STEPON_MOTORS:     StepOnY_Motors();   motorYstate = STEPOFF_MOTORS;   break;
-        case STEPOFF_MOTORS:    StepOffY_Motors();  motorYstate = IDLE_MOTORS;      break;
+        case STEPOFF_MOTORS:    StepOffY_Motors();  motorYstate = motorYstateBuffer; motorYstateBuffer = IDLE_MOTORS; break;
         default:                                    motorYstate = IDLE_MOTORS;      break;
     }
 
@@ -82,8 +109,22 @@ void evaluate_Motors(void)
         case FOREWARD_MOTORS:   ForwardZ_Motors();  motorZstate = STEPON_MOTORS;    break;
         case BACKWARD_MOTORS:   BackwardZ_Motors(); motorZstate = STEPON_MOTORS;    break;
         case STEPON_MOTORS:     StepOnZ_Motors();   motorZstate = STEPOFF_MOTORS;   break;
-        case STEPOFF_MOTORS:    StepOffZ_Motors();  motorZstate = IDLE_MOTORS;      break;
+        case STEPOFF_MOTORS:    StepOffZ_Motors();  motorZstate = motorZstateBuffer; motorZstateBuffer = IDLE_MOTORS; break;
         default:                                    motorZstate = IDLE_MOTORS;      break;
     }
 
+    switch(motorEstate)
+    {
+        case FOREWARD_MOTORS:   ForwardE_Motors();  motorEstate = STEPON_MOTORS;    break;
+        case BACKWARD_MOTORS:   BackwardE_Motors(); motorEstate = STEPON_MOTORS;    break;
+        case STEPON_MOTORS:     StepOnE_Motors();   motorEstate = STEPOFF_MOTORS;   break;
+        case STEPOFF_MOTORS:    StepOffE_Motors();  motorEstate = motorEstateBuffer; motorEstateBuffer = IDLE_MOTORS; break;
+        default:                                    motorEstate = IDLE_MOTORS;      break;
+    }
 }
+
+
+int getMotorXstate() {return motorXstate;}
+int getMotorYstate() {return motorYstate;}
+int getMotorZstate() {return motorZstate;}
+int getMotorEstate() {return motorEstate;}

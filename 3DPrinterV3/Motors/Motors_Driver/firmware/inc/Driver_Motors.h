@@ -16,6 +16,9 @@ void doStepE_Motors(long direction);
 
 void evaluate_Motors(void);
 
-
+int getMotorXstate(void);
+int getMotorYstate(void);
+int getMotorZstate(void);
+int getMotorEstate(void);
 
 #endif
