@@ -209,14 +209,16 @@ static void MoveXY_Analyser(void)
             long x1 = Xn;                           long y1 = Yn;                           long e1 = En;
             float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
             float aX1 = accelerationStart*cosX;     float aY1 = accelerationStart*cosY;     float aE1 = accelerationStart*cosE;
-            command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
+            //command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
+            command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();  return;
         }
         if( conserveSpeedStart(Xn, Yn, 0) )
         {
             long x1 = Xn;                           long y1 = Yn;                           long e1 = En;
             float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
             float aX1 = accelerationFinish*cosX;    float aY1 = accelerationFinish*cosY;    float aE1 = accelerationFinish*cosE;
-            command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
+            //command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
+            command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();  return;
         }
         float distance_XY_buffer = distanceStartFastMove(distance_XY, speedStart, speedFinish, accelerationStart, accelerationFinish);
         float speed_XY_buffer = speedMaxFastMove(distance_XY, speedStart, speedFinish, accelerationStart, accelerationFinish);
@@ -227,7 +229,8 @@ static void MoveXY_Analyser(void)
         long x2 = Xn - x1;                          long y2 = Yn - y1;                              long e2 = En - e1;
         float vX2 = speed_XY_buffer*cosX;           float vY2 = speed_XY_buffer*cosY;               float vE2 = speed_XY_buffer*cosE;
         float aX2 = accelerationFinish*cosX;        float aY2 = accelerationFinish*cosY;            float aE2 = accelerationFinish*cosE;
-        command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0, aE2,   0, 0};  firstInCommandBuffer_Gcode(command2);  return;
+        //command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0, aE2,   0, 0};  firstInCommandBuffer_Gcode(command2);  return;
+        command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0, aE2,   0, 0};  firstInCommandBuffer_Gcode(command2);  if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();  return;
     }
     long x1 = lroundf(LnStart*cosX);        long y1 = lroundf(LnStart*cosY);        long e1 = lroundf(LnStart*cosE);
     float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
@@ -241,6 +244,8 @@ static void MoveXY_Analyser(void)
     float vX3 = speedTarget*cosX;           float vY3 = speedTarget*cosY;           float vE3 = speedTarget*cosE;
     float aX3 = accelerationFinish*cosX;    float aY3 = accelerationFinish*cosY;    float aE3 = accelerationFinish*cosE;
     command_Gcode command3 = {MOVE_COMMAND, x3, y3, 0, e3,    vX3, vY3, 0, vE3,    aX3, aY3, 0, aE3,   0, 0};  if(x3 != 0 || y3 != 0) firstInCommandBuffer_Gcode(command3);
+    if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();
+    //smoothStop_Gcode();
 }
 
 static void MoveE_Analyser(void)
@@ -570,8 +575,10 @@ void smoothStop_Gcode(void)
     float cosY = (float)command.dYn/allowedDistance;
     float cosE = (float)command.dEn/allowedDistance;
 
-    if    (allowedDistance + 0.5 > distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
-    while (allowedDistance + 0.5 < distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
+    //if    (allowedDistance + 0.5 > distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
+    //while (allowedDistance + 0.5 < distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
+    if    (allowedDistance + 1 >= distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration)) return;
+    while (allowedDistance + 1 <  distanceRequired(speedAtTheStart, speedAtTheEnd, acceleration))
     {
         commandBuffer[number(currentCommandNumber)].FnX = cosX*sqrtf(pow(speedAtTheEnd,2)+2*acceleration*allowedDistance);
         commandBuffer[number(currentCommandNumber)].FnY = cosY*sqrtf(pow(speedAtTheEnd,2)+2*acceleration*allowedDistance);
