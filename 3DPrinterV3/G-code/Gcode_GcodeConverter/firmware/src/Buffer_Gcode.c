@@ -166,6 +166,8 @@ static _Bool conserveSpeedFinish(long Xn, long Yn, long Zn)
     float xy1xy2Critical = sqrtf(xy1xy1)*sqrtf(xy2xy2)*cos(3.14*(float)CRITICAL_ANGLE_XY/180.0);
     if (xy1xy2 < xy1xy2Critical)
         return false;
+    if (XnNext == 0 && YnNext == 0)
+        return false;
     return true;
 }
 
