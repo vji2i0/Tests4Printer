@@ -164,6 +164,8 @@ void openDirectory_USBdrive(const TCHAR* pathToDirectory)
 
 }
 
+
+
 void readItem_USBdrive()
 {
     if (currentMountedStatus_USBdrive == UNMOUNTED_USBDRIVE)

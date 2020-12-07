@@ -185,6 +185,7 @@ TEST(Driver_USBdrive, open_arbitrary_directory_of_mounted_usb_drive_successful)
     STRCMP_EQUAL("f:/dir1", getPath_USBdrive());
 }
 
+
 TEST(Driver_USBdrive, open_arbitrary_directory_of_mounted_usb_drive_unsuccessful)
 {
     mock_c()->expectOneCall("f_mount")
