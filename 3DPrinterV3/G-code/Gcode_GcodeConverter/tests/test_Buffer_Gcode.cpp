@@ -793,6 +793,64 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_conserve_spe
     CHECK( fabs(0 - a1) < floatError );         CHECK( fabs(0 - a2) < floatError );         CHECK( fabs(0 - a3) < floatError );
 }
 
+TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_move_Z_conserve_speed_smoothly)
+{
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, 200, 0,   0, 0,     1000,    0, 0,     0, 0};
+    CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 300, 0,   0, 0,     1000,    0, 0,     0, 0};
+    CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
+    const descreteCommand_Gcode descreteMoveZSlow3 = {MOVE_COMMAND, 300, 0, 100, 0,        0, 1000, 0,     0, 0};
+
+    float vTarget1 = descreteMoveXSlow1.FnXY;
+
+
+    long  x1, x2, x3;
+    long  y1, y2, y3;
+    float v1, v2, v3;
+    float a1, a2, a3;
+
+    addElementToDescreteCommandBuffer_Gcode(descreteMoveXSlow1);
+    addElementToDescreteCommandBuffer_Gcode(descreteMoveXSlow2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 1, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;
+    CHECK(x1 > 0);
+    CHECK_EQUAL(descreteMoveXSlow1.Xn, x1);
+    y1 = getCommandBufferElement_Gcode(1).dYn;
+    CHECK_EQUAL(0, y1);
+    v1 = getCommandBufferElement_Gcode(1).FnX;
+    CHECK( fabs(0 - v1) < floatError );
+    v1 = getCommandBufferElement_Gcode(1).FnY;
+    CHECK( fabs(0 - v1) < floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnX;
+    CHECK( fabs(aDefault - a1) < floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;
+    CHECK( fabs(0 - a1) < floatError );
+
+
+    addElementToDescreteCommandBuffer_Gcode(descreteMoveZSlow3);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 3, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;  x2 = getCommandBufferElement_Gcode(2).dXn;  x3 = getCommandBufferElement_Gcode(3).dXn;
+    CHECK(x1 > 0);                              CHECK(x2 > 0);                              CHECK(x3 > 0);
+    CHECK_EQUAL(descreteMoveXSlow2.Xn, x1+x2+x3);
+    CHECK(fabs(x1 - x2 - x3) < floatError );
+    y1 = getCommandBufferElement_Gcode(1).dYn;  y2 = getCommandBufferElement_Gcode(2).dYn;  y3 = getCommandBufferElement_Gcode(3).dYn;
+    CHECK_EQUAL(0, y1);                         CHECK_EQUAL(0, y2);                         CHECK_EQUAL(0, y3);
+    v1 = getCommandBufferElement_Gcode(1).FnX;  v2 = getCommandBufferElement_Gcode(2).FnX;  v3 = getCommandBufferElement_Gcode(3).FnX;
+    CHECK( fabs(0 - v1) < floatError );         CHECK( fabs(v2) < fabs(vTarget1) );         CHECK( fabs(v3) < fabs(vTarget1) );
+    v1 = getCommandBufferElement_Gcode(1).FnY;  v2 = getCommandBufferElement_Gcode(2).FnY;  v3 = getCommandBufferElement_Gcode(3).FnY;
+    CHECK( fabs(0 - v1) < floatError );         CHECK( fabs(0 - v2) < floatError );         CHECK( fabs(0 - v3) < floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnX;  a2 = getCommandBufferElement_Gcode(2).AnX;  a3 = getCommandBufferElement_Gcode(3).AnX;
+    CHECK( fabs(aDefault - a1) < floatError );  CHECK( fabs(-aDefault - a2) < floatError ); CHECK( fabs(-aDefault - a3) <floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnY;  a2 = getCommandBufferElement_Gcode(2).AnY;  a3 = getCommandBufferElement_Gcode(3).AnY;
+    CHECK( fabs(0 - a1) < floatError );         CHECK( fabs(0 - a2) < floatError );         CHECK( fabs(0 - a3) < floatError );
+}
+
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_backwards_conserve_speed_smoothly)
 {
     const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, -10000, 0, 0, 0,     1000, 0, 0,     0, 0};
