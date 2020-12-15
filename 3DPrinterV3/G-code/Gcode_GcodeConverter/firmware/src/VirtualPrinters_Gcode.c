@@ -1,10 +1,12 @@
 #include "VirtualPrinters_Gcode.h"
 
+#include "Config_Gcode.h"
+
 #include "Fake_Motors.h"
 
 #include "math.h"
 
-const float evaluationPeriod_Gcode = 0.001;
+const float evaluationPeriod_Gcode = TIMER_PERIOD_S;
 
 
 static struct
