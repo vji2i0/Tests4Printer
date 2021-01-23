@@ -192,7 +192,7 @@ static float speedMaxFastMove(float totalDistance, float speedStart, float speed
 static void MoveXY_Analyser(void)
 {
     long Xn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
-    long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
+    long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn; if((Xn==0) && (Yn==0)) return;
     long En = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
     float distance_XY = sqrtf(pow(Xn,2)+pow(Yn,2)); float cosX = (float)Xn/distance_XY; float cosY = (float)Yn/distance_XY; float cosE = (float)En/(float)distance_XY;
     float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY;  if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECOND ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECOND;
@@ -211,7 +211,6 @@ static void MoveXY_Analyser(void)
             long x1 = Xn;                           long y1 = Yn;                           long e1 = En;
             float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
             float aX1 = accelerationStart*cosX;     float aY1 = accelerationStart*cosY;     float aE1 = accelerationStart*cosE;
-            //command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
             command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();  return;
         }
         if( conserveSpeedStart(Xn, Yn, 0) )
@@ -219,7 +218,6 @@ static void MoveXY_Analyser(void)
             long x1 = Xn;                           long y1 = Yn;                           long e1 = En;
             float vX1 = speedStart*cosX;            float vY1 = speedStart*cosY;            float vE1 = speedStart*cosE;
             float aX1 = accelerationFinish*cosX;    float aY1 = accelerationFinish*cosY;    float aE1 = accelerationFinish*cosE;
-            //command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  return;
             command_Gcode command1 = {MOVE_COMMAND, x1, y1, 0, e1,    vX1, vY1, 0, vE1,    aX1, aY1, 0, aE1,   0, 0};  firstInCommandBuffer_Gcode(command1);  if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();  return;
         }
         float distance_XY_buffer = distanceStartFastMove(distance_XY, speedStart, speedFinish, accelerationStart, accelerationFinish);
@@ -231,7 +229,6 @@ static void MoveXY_Analyser(void)
         long x2 = Xn - x1;                          long y2 = Yn - y1;                              long e2 = En - e1;
         float vX2 = speed_XY_buffer*cosX;           float vY2 = speed_XY_buffer*cosY;               float vE2 = speed_XY_buffer*cosE;
         float aX2 = accelerationFinish*cosX;        float aY2 = accelerationFinish*cosY;            float aE2 = accelerationFinish*cosE;
-        //command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0, aE2,   0, 0};  firstInCommandBuffer_Gcode(command2);  return;
         command_Gcode command2 = {MOVE_COMMAND, x2, y2, 0, e2,    vX2, vY2, 0, vE2,    aX2, aY2, 0, aE2,   0, 0};  firstInCommandBuffer_Gcode(command2);  if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();  return;
     }
     long x1 = lroundf(LnStart*cosX);        long y1 = lroundf(LnStart*cosY);        long e1 = lroundf(LnStart*cosE);
@@ -247,7 +244,6 @@ static void MoveXY_Analyser(void)
     float aX3 = accelerationFinish*cosX;    float aY3 = accelerationFinish*cosY;    float aE3 = accelerationFinish*cosE;
     command_Gcode command3 = {MOVE_COMMAND, x3, y3, 0, e3,    vX3, vY3, 0, vE3,    aX3, aY3, 0, aE3,   0, 0};  if(x3 != 0 || y3 != 0) firstInCommandBuffer_Gcode(command3);
     if ( !conserveSpeedFinish(Xn, Yn, 0) ) smoothStop_Gcode();
-    //smoothStop_Gcode();
 }
 
 static void MoveE_Analyser(void)
@@ -262,7 +258,6 @@ static void MoveE_Analyser(void)
 
 static void MoveZ_Analyser(void)
 {
-
     long Zn = getDescreteCommandBufferElement_Gcode(2).Zn - getDescreteCommandBufferElement_Gcode(1).Zn;
     float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnZ;
     if ( getDescreteCommandBufferElement_Gcode(2).FnZ > MAX_SPEED_Z_STEPS_PER_SECOND ) speedTarget = MAX_SPEED_Z_STEPS_PER_SECOND;
