@@ -41,4 +41,5 @@ void descreteCommandAnalyser_Gcode(void);
 
 void smoothStop_Gcode(void);
 
+_Bool descreteCommandIsRepeated(descreteCommand_Gcode descreteCommand);
 #endif

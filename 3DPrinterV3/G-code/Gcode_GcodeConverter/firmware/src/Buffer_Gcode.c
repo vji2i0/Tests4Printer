@@ -151,6 +151,8 @@ static _Bool conserveSpeedStart(long Xn, long Yn, long Zn)
     float xy1xy2Critical = sqrtf(xy1xy1)*sqrtf(xy2xy2)*cos(3.14*(float)CRITICAL_ANGLE_XY/180.0);
     if (xy1xy2 < xy1xy2Critical)
         return false;
+    if (XnPrevious == 0 && YnPrevious == 0)
+        return false;
     return true;
 }
 
@@ -192,7 +194,7 @@ static float speedMaxFastMove(float totalDistance, float speedStart, float speed
 static void MoveXY_Analyser(void)
 {
     long Xn = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
-    long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn; if((Xn==0) && (Yn==0)) return;
+    long Yn = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
     long En = getDescreteCommandBufferElement_Gcode(2).En - getDescreteCommandBufferElement_Gcode(1).En;
     float distance_XY = sqrtf(pow(Xn,2)+pow(Yn,2)); float cosX = (float)Xn/distance_XY; float cosY = (float)Yn/distance_XY; float cosE = (float)En/(float)distance_XY;
     float speedTarget = getDescreteCommandBufferElement_Gcode(2).FnXY;  if ( getDescreteCommandBufferElement_Gcode(2).FnXY > MAX_SPEED_XY_STEPS_PER_SECOND ) speedTarget = MAX_SPEED_XY_STEPS_PER_SECOND;
@@ -611,3 +613,17 @@ void smoothStop_Gcode(void)
 }
 
 
+_Bool descreteCommandIsRepeated(descreteCommand_Gcode descreteCommand)
+{
+    if( descreteBuffer[number(3)].type == descreteCommand.type &&
+        descreteBuffer[number(3)].Xn == descreteCommand.Xn &&
+        descreteBuffer[number(3)].Yn == descreteCommand.Yn &&
+        descreteBuffer[number(3)].Zn == descreteCommand.Zn &&
+        fabs(descreteBuffer[number(3)].FnXY - descreteCommand.FnXY) < 0.1 &&
+        fabs(descreteBuffer[number(3)].FnZ - descreteCommand.FnZ) < 0.1 &&
+        fabs(descreteBuffer[number(3)].FnE - descreteCommand.FnE) < 0.1 &&
+        fabs(descreteBuffer[number(3)].extrT - descreteCommand.extrT) < 0.1 &&
+        fabs(descreteBuffer[number(3)].bedT - descreteCommand.bedT) < 0.1
+        ) return true;
+    return false;
+}
