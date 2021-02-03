@@ -31,7 +31,8 @@ extern "C"
 TEST_GROUP(Descritization_Gcode)
 {
     float X1=999.99, Y1=999.99, Z1=999.99, E1=999.99, F1=9999.99, bedT1 = 99.99, extrT1 = 99.99;
-    //float X2=100.11, Y2=200.22, Z2=300.33, E2=400.44, F2=5000.55, bedT2 = 70.77, extrT2 = 80.88;
+
+
     convertedCommand_Gcode convertedMoveCommand_1 = {MOVE_COMMAND, X1, Y1, Z1, E1, F1, bedT1, extrT1};
     convertedCommand_Gcode convertedSetCoordinatesCommand_1 = {SET_COORDINATES_COMMAND, X1, Y1, Z1, E1, F1, bedT1, extrT1};
     convertedCommand_Gcode convertedHomeCommand_1 = {GO_HOME_XYZ_COMMAND, X1, Y1, Z1, E1, F1, bedT1, extrT1};
@@ -186,7 +187,31 @@ TEST(Descritization_Gcode, wait_bed_temperature)
     CHECK_EQUAL(extrT1, getDescreteCommand_Gcode().bedT);
 }
 
+TEST(Descritization_Gcode, bagged_motion)
+{
+    float X1b=-0.289, Y1b=11.312;
+    float X2b=0.370, Y2b=12.454;
+    float X3b=0.627, Y3b=13.855;
 
+    convertedCommand_Gcode convertedMoveCommand_1b = {MOVE_COMMAND, X1b, Y1b, 0, 0, 0, 0, 0};
+    convertedCommand_Gcode convertedMoveCommand_2b = {MOVE_COMMAND, X2b, Y2b, 0, 0, 0, 0, 0};
+    convertedCommand_Gcode convertedMoveCommand_3b = {MOVE_COMMAND, X3b, Y3b, 0, 0, 0, 0, 0};
+
+    setDescreteCommand_Gcode(convertedMoveCommand_1b);
+    CHECK_EQUAL(MOVE_COMMAND, getDescreteCommand_Gcode().type);
+    CHECK( fabs(X1b*STEPS_PER_MM_XY - getDescreteCommand_Gcode().Xn) < oneStep );
+    CHECK( fabs(Y1b*STEPS_PER_MM_XY - getDescreteCommand_Gcode().Yn) < oneStep );
+
+    setDescreteCommand_Gcode(convertedMoveCommand_2b);
+    CHECK_EQUAL(MOVE_COMMAND, getDescreteCommand_Gcode().type);
+    CHECK( fabs(X2b*STEPS_PER_MM_XY - getDescreteCommand_Gcode().Xn) < oneStep );
+    CHECK( fabs(Y2b*STEPS_PER_MM_XY - getDescreteCommand_Gcode().Yn) < oneStep );
+
+    setDescreteCommand_Gcode(convertedMoveCommand_3b);
+    CHECK_EQUAL(MOVE_COMMAND, getDescreteCommand_Gcode().type);
+    CHECK( fabs(X3b*STEPS_PER_MM_XY - getDescreteCommand_Gcode().Xn) < oneStep );
+    CHECK( fabs(Y3b*STEPS_PER_MM_XY - getDescreteCommand_Gcode().Yn) < oneStep );
+}
 
 
 

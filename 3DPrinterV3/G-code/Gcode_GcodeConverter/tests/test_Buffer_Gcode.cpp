@@ -353,7 +353,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_slow_X_cross_speed_limit)
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_X)
 {
-    const descreteCommand_Gcode descreteMoveXFast = {MOVE_COMMAND, 1000, 0, 0, 0,     3000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXFast = {MOVE_COMMAND, 100, 0, 0, 0,     3000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXFast.FnXY);
 
     addElementToDescreteCommandBuffer_Gcode(descreteMoveXFast);
@@ -385,7 +385,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_X)
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_X_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXFast = {MOVE_COMMAND, -1000, 0, 0, 0,     3000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXFast = {MOVE_COMMAND, -100, 0, 0, 0,     3000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXFast.FnXY);
 
     addElementToDescreteCommandBuffer_Gcode(descreteMoveXFast);
@@ -573,9 +573,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_X_backwards_conserv
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_X_conserve_speed)
 {
-    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND,   100, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND,   10, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 20000, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 2000, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
 
     float speedFinal1 = sqrt(2*(float)descreteMoveXSlow1.Xn*aDefault);
@@ -627,9 +627,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_X_conserve_sp
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_X_backwards_conserve_speed)
 {
-    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND,   -100, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND,   -10, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, -20000, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, -2000, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
 
     float speedFinal1 = -sqrt(2*fabs(descreteMoveXSlow1.Xn)*aDefault);
@@ -683,7 +683,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_conserve_spe
 {
     const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, 10000, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 10100, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 10015, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
 
     float vTarget1 = descreteMoveXSlow1.FnXY;
@@ -723,7 +723,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_conserve_spe
     x1 = getCommandBufferElement_Gcode(1).dXn;  x2 = getCommandBufferElement_Gcode(2).dXn;  x3 = getCommandBufferElement_Gcode(3).dXn;  x4 = getCommandBufferElement_Gcode(4).dXn;
     CHECK(x1 > 0);                              CHECK(x2 > 0);                              CHECK(x3 > 0);                              CHECK(x4 > 0);
     CHECK_EQUAL(descreteMoveXSlow2.Xn, x1+x2+x3+x4);
-    CHECK_EQUAL(lroundf(pow(vTarget1, 2)/2/aDefault), x3+x4);
+    CHECK(labs(lroundf(pow(vTarget1, 2)/2/aDefault) - (x3+x4) ) <= 1);
     y1 = getCommandBufferElement_Gcode(1).dYn;  y2 = getCommandBufferElement_Gcode(2).dYn;  y3 = getCommandBufferElement_Gcode(3).dYn;  y4 = getCommandBufferElement_Gcode(4).dYn;
     CHECK_EQUAL(0, y1);                         CHECK_EQUAL(0, y2);                         CHECK_EQUAL(0, y3);                         CHECK_EQUAL(0, y4);
     v1 = getCommandBufferElement_Gcode(1).FnX;  v2 = getCommandBufferElement_Gcode(2).FnX;  v3 = getCommandBufferElement_Gcode(3).FnX;  v4 = getCommandBufferElement_Gcode(4).FnX;
@@ -738,9 +738,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_conserve_spe
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, 200, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, 20, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 300, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 30, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
 
     float vTarget1 = descreteMoveXSlow1.FnXY;
@@ -795,11 +795,11 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_conserve_spe
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_move_Z_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, 200, 0,   0, 0,     1000,    0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, 20, 0,   0, 0,     1000,    0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 300, 0,   0, 0,     1000,    0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, 30, 0,   0, 0,     1000,    0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
-    const descreteCommand_Gcode descreteMoveZSlow3 = {MOVE_COMMAND, 300, 0, 100, 0,        0, 1000, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveZSlow3 = {MOVE_COMMAND, 30, 0,  10, 0,        0, 1000, 0,     0, 0};
 
     float vTarget1 = descreteMoveXSlow1.FnXY;
 
@@ -853,9 +853,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_move_Z_conse
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_backwards_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, -10000, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, -1000, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, -10100, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, -1010, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
 
     float vTarget1 = -descreteMoveXSlow1.FnXY;
@@ -895,7 +895,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_backwards_co
     x1 = getCommandBufferElement_Gcode(1).dXn;  x2 = getCommandBufferElement_Gcode(2).dXn;  x3 = getCommandBufferElement_Gcode(3).dXn;  x4 = getCommandBufferElement_Gcode(4).dXn;
     CHECK(x1 < 0);                              CHECK(x2 < 0);                              CHECK(x3 < 0);                              CHECK(x4 < 0);
     CHECK_EQUAL(descreteMoveXSlow2.Xn, x1+x2+x3+x4);
-    CHECK_EQUAL(-lroundf(pow(vTarget1, 2)/2/aDefault), x3+x4);
+    CHECK(labs(-lroundf(pow(vTarget1, 2)/2/aDefault) - (x3+x4) ) <= 1);
     y1 = getCommandBufferElement_Gcode(1).dYn;  y2 = getCommandBufferElement_Gcode(2).dYn;  y3 = getCommandBufferElement_Gcode(3).dYn;  y4 = getCommandBufferElement_Gcode(4).dYn;
     CHECK_EQUAL(0, y1);                         CHECK_EQUAL(0, y2);                         CHECK_EQUAL(0, y3);                         CHECK_EQUAL(0, y4);
     v1 = getCommandBufferElement_Gcode(1).FnX;  v2 = getCommandBufferElement_Gcode(2).FnX;  v3 = getCommandBufferElement_Gcode(3).FnX;  v4 = getCommandBufferElement_Gcode(4).FnX;
@@ -910,9 +910,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_X_backwards_co
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_X_backwards_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, -200, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow1 = {MOVE_COMMAND, -20, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, -300, 0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXSlow2 = {MOVE_COMMAND, -30, 0, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXSlow2.FnXY);
 
     float vTarget1 = -descreteMoveXSlow1.FnXY;
@@ -1061,7 +1061,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_slow_Y_cross_speed_limit)
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_Y)
 {
-    const descreteCommand_Gcode descreteMoveYFast = {MOVE_COMMAND, 0, 1000, 0, 0,     3000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveYFast = {MOVE_COMMAND, 0, 100, 0, 0,     3000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveYFast.FnXY);
 
     addElementToDescreteCommandBuffer_Gcode(descreteMoveYFast);
@@ -1094,7 +1094,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_Y)
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_Y_backwards)
 {
-    const descreteCommand_Gcode descreteMoveYFast = {MOVE_COMMAND, 0, -1000, 0, 0,     3000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveYFast = {MOVE_COMMAND, 0, -100, 0, 0,     3000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveYFast.FnXY);
 
     addElementToDescreteCommandBuffer_Gcode(descreteMoveYFast);
@@ -1288,9 +1288,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_Y_backwards_conserv
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_Y_conserve_speed)
 {
-    const descreteCommand_Gcode descreteMoveYSlow1 = {MOVE_COMMAND, 0,   100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveYSlow1 = {MOVE_COMMAND, 0,   10, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveYSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveYSlow2 = {MOVE_COMMAND, 0, 20000, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveYSlow2 = {MOVE_COMMAND, 0, 2000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveYSlow2.FnXY);
 
     float speedFinal1 = sqrt(2*(float)descreteMoveYSlow1.Yn*aDefault);
@@ -1344,9 +1344,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_Y_conserve_sp
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_Y_backwards_conserve_speed)
 {
-    const descreteCommand_Gcode descreteMoveYSlow1 = {MOVE_COMMAND, 0,   -100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveYSlow1 = {MOVE_COMMAND, 0,   -10, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveYSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveYSlow2 = {MOVE_COMMAND, 0, -20000, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveYSlow2 = {MOVE_COMMAND, 0, -2000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveYSlow2.FnXY);
 
     float speedFinal1 = -sqrt(2*fabs(descreteMoveYSlow1.Yn)*aDefault);
@@ -1400,9 +1400,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_Y_backwards_c
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_Y_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, 10000, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, 1000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, 10100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, 1010, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
 
     float vTarget1 = descreteMoveSlow1.FnXY;
@@ -1444,7 +1444,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_Y_conserve_spe
     y1 = getCommandBufferElement_Gcode(1).dYn;  y2 = getCommandBufferElement_Gcode(2).dYn;  y3 = getCommandBufferElement_Gcode(3).dYn;  y4 = getCommandBufferElement_Gcode(4).dYn;
     CHECK(y1 > 0);                              CHECK(y2 > 0);                              CHECK(y3 > 0);                              CHECK(y4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
-    CHECK_EQUAL(lroundf(pow(vTarget1, 2)/2/aDefault), y3+y4);
+    CHECK( labs(lroundf(pow(vTarget1, 2)/2/aDefault) - (y3+y4) ) <= 1);
     v1 = getCommandBufferElement_Gcode(1).FnX;  v2 = getCommandBufferElement_Gcode(2).FnX;  v3 = getCommandBufferElement_Gcode(3).FnX;  v4 = getCommandBufferElement_Gcode(4).FnX;
     CHECK( fabs(0 - v1) < floatError );         CHECK( fabs(0 - v2) < floatError );         CHECK( fabs(0 - v3) < floatError );         CHECK( fabs(0 - v4) < floatError );
     v1 = getCommandBufferElement_Gcode(1).FnY;  v2 = getCommandBufferElement_Gcode(2).FnY;  v3 = getCommandBufferElement_Gcode(3).FnY;  v4 = getCommandBufferElement_Gcode(4).FnY;
@@ -1457,9 +1457,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_Y_conserve_spe
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_Y_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, 200, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, 20, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, 300, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, 30, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
 
     float vTarget1 = descreteMoveSlow1.FnXY;
@@ -1514,9 +1514,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_Y_conserve_spe
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_Y_backwards_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, -10000, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, -1000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, -10100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, -1010, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
 
     float vTarget1 = -descreteMoveSlow1.FnXY;
@@ -1558,7 +1558,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_Y_backwards_co
     y1 = getCommandBufferElement_Gcode(1).dYn;  y2 = getCommandBufferElement_Gcode(2).dYn;  y3 = getCommandBufferElement_Gcode(3).dYn;  y4 = getCommandBufferElement_Gcode(4).dYn;
     CHECK(y1 < 0);                              CHECK(y2 < 0);                              CHECK(y3 < 0);                              CHECK(y4 < 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
-    CHECK_EQUAL(-lroundf(pow(vTarget1, 2)/2/aDefault), y3+y4);
+    CHECK( labs(-lroundf(pow(vTarget1, 2)/2/aDefault) - (y3+y4) ) <= 1);
     v1 = getCommandBufferElement_Gcode(1).FnX;  v2 = getCommandBufferElement_Gcode(2).FnX;  v3 = getCommandBufferElement_Gcode(3).FnX;  v4 = getCommandBufferElement_Gcode(4).FnX;
     CHECK( fabs(0 - v1) < floatError );         CHECK( fabs(0 - v2) < floatError );         CHECK( fabs(0 - v3) < floatError );         CHECK( fabs(0 - v4) < floatError );
     v1 = getCommandBufferElement_Gcode(1).FnY;  v2 = getCommandBufferElement_Gcode(2).FnY;  v3 = getCommandBufferElement_Gcode(3).FnY;  v4 = getCommandBufferElement_Gcode(4).FnY;
@@ -1571,9 +1571,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_Y_backwards_co
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_stop_Y_backwards_conserve_speed_smoothly)
 {
-    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, -200, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND, 0, -20, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, -300, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND, 0, -30, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
 
     float vTarget1 = -descreteMoveSlow1.FnXY;
@@ -2109,7 +2109,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_slow_XY_3_cross_speed_lim
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_1_cross_speed_limit)
 {
-    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, 200, 100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, 20, 10, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYFast.FnXY);
     float distance = sqrt((float)descreteMoveXYFast.Xn*(float)descreteMoveXYFast.Xn+(float)descreteMoveXYFast.Yn*(float)descreteMoveXYFast.Yn);
     float cosX = (float)descreteMoveXYFast.Xn/distance;
@@ -2146,7 +2146,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_1_cross_speed_lim
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_2_cross_speed_limit)
 {
-    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, 100, 200, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, 10, 20, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYFast.FnXY);
     float distance = sqrt((float)descreteMoveXYFast.Xn*(float)descreteMoveXYFast.Xn+(float)descreteMoveXYFast.Yn*(float)descreteMoveXYFast.Yn);
     float cosX = (float)descreteMoveXYFast.Xn/distance;
@@ -2183,7 +2183,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_2_cross_speed_lim
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_3_cross_speed_limit)
 {
-    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, 200, 200, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, 20, 20, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYFast.FnXY);
     float distance = sqrt((float)descreteMoveXYFast.Xn*(float)descreteMoveXYFast.Xn+(float)descreteMoveXYFast.Yn*(float)descreteMoveXYFast.Yn);
     float cosX = (float)descreteMoveXYFast.Xn/distance;
@@ -2220,7 +2220,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_3_cross_speed_lim
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_1_cross_speed_limit_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, -200, -100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, -20, -10, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYFast.FnXY);
     float distance = sqrt((float)descreteMoveXYFast.Xn*(float)descreteMoveXYFast.Xn+(float)descreteMoveXYFast.Yn*(float)descreteMoveXYFast.Yn);
     float cosX = (float)descreteMoveXYFast.Xn/distance;
@@ -2257,7 +2257,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_1_cross_speed_lim
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_2_cross_speed_limit_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, -100, -200, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, -10, -20, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYFast.FnXY);
     float distance = sqrt((float)descreteMoveXYFast.Xn*(float)descreteMoveXYFast.Xn+(float)descreteMoveXYFast.Yn*(float)descreteMoveXYFast.Yn);
     float cosX = (float)descreteMoveXYFast.Xn/distance;
@@ -2294,7 +2294,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_2_cross_speed_lim
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XY_3_cross_speed_limit_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, -200, -200, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYFast = {MOVE_COMMAND, -20, -20, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYFast.FnXY);
     float distance = sqrt((float)descreteMoveXYFast.Xn*(float)descreteMoveXYFast.Xn+(float)descreteMoveXYFast.Yn*(float)descreteMoveXYFast.Yn);
     float cosX = (float)descreteMoveXYFast.Xn/distance;
@@ -2916,9 +2916,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_XY_conserve_speed_3
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_speed_1)
 {
-    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,       100,    50, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,       10,      5, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     20000, 10000, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     2000,   1000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveXYSlow1.Xn, 2.0)+pow((float)descreteMoveXYSlow1.Yn,2));
     float cosX = (float)descreteMoveXYSlow1.Xn/distance;
@@ -2981,9 +2981,9 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_s
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_speed_2)
 {
-    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,        50,   100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,        5,   10, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     10000, 20000, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     1000, 2000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveXYSlow1.Xn, 2.0)+pow((float)descreteMoveXYSlow1.Yn,2));
     float cosX = (float)descreteMoveXYSlow1.Xn/distance;
@@ -3046,7 +3046,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_s
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_speed_3)
 {
-    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,        50,    50, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,         5,     5, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow1.FnXY);
     const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     10000, 10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow2.FnXY);
@@ -3111,7 +3111,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_s
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_speed_1_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,       -100,    -50, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,        -10,     -5, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow1.FnXY);
     const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     -20000, -10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow2.FnXY);
@@ -3176,7 +3176,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_s
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_speed_2_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,        -50,   -100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,         -5,    -10, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow1.FnXY);
     const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     -10000, -20000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow2.FnXY);
@@ -3241,7 +3241,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_s
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XY_conserve_speed_3_backwards)
 {
-    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,        -50,    -50, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYSlow1 = {MOVE_COMMAND,         -5,     -5, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow1.FnXY);
     const descreteCommand_Gcode descreteMoveXYSlow2 = {MOVE_COMMAND,     -10000, -10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYSlow2.FnXY);
@@ -3308,7 +3308,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     20000, 10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20100, 10050, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20010, 10005, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
     float cosX = (float)descreteMoveSlow1.Xn/distance;
@@ -3376,7 +3376,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     10000, 20000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     10050, 20100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     10005, 20010, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
     float cosX = (float)descreteMoveSlow1.Xn/distance;
@@ -3442,7 +3442,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     10000, 10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     10100, 10100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     10010, 10010, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
     float cosX = (float)descreteMoveSlow1.Xn/distance;
@@ -3509,7 +3509,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     -20000, -10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     -20100, -10050, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     -20010, -10005, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
     float cosX = (float)descreteMoveSlow1.Xn/distance;
@@ -3575,7 +3575,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     -10000, -20000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     -10050, -20100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     -10005, -20010, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
     float cosX = (float)descreteMoveSlow1.Xn/distance;
@@ -3641,7 +3641,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
 {
     const descreteCommand_Gcode descreteMoveSlow1 = {MOVE_COMMAND,     -10000, -10000, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow1.FnXY);
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     -10100, -10100, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     -10010, -10010, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance = sqrt(pow((float)descreteMoveSlow1.Xn, 2.0)+pow((float)descreteMoveSlow1.Yn,2));
     float cosX = (float)descreteMoveSlow1.Xn/distance;
@@ -4142,7 +4142,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_slow_XYE_2_cross_speed_li
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XYE_1)
 {
-    const descreteCommand_Gcode descreteMoveXYE = {MOVE_COMMAND, 100, 50, 0, 100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYE = {MOVE_COMMAND, 10, 5, 0, 10,     1000, 0, 2000,     0, 0};
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMoveXYE.FnXY)-fabs(descreteMoveXYE.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMoveXYE.FnXY);
     float distance = sqrt((float)descreteMoveXYE.Xn*(float)descreteMoveXYE.Xn+(float)descreteMoveXYE.Yn*(float)descreteMoveXYE.Yn);
@@ -4191,7 +4191,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XYE_1)
 
 TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XYE_2)
 {
-    const descreteCommand_Gcode descreteMoveXYE = {MOVE_COMMAND, 50, 100, 0, 100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYE = {MOVE_COMMAND, 5, 10, 0, 10,     1000, 0, 2000,     0, 0};
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMoveXYE.FnXY)-fabs(descreteMoveXYE.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMoveXYE.FnXY);
     float distance = sqrt((float)descreteMoveXYE.Xn*(float)descreteMoveXYE.Xn+(float)descreteMoveXYE.Yn*(float)descreteMoveXYE.Yn);
@@ -4239,7 +4239,7 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_fast_XYE_2)
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XYE_conserve_speed_1)
 {
-    const descreteCommand_Gcode descreteMoveXYE1 = {MOVE_COMMAND,       100,    50, 0,    100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYE1 = {MOVE_COMMAND,        10,     5, 0,     10,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYE1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMoveXYE1.FnXY)-fabs(descreteMoveXYE1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMoveXYE1.FnXY);
@@ -4328,7 +4328,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XYE_conserve_
 
 TEST(Descrete_command_analyser_Gcode, two_commands_move_fast_start_XYE_conserve_speed_2)
 {
-    const descreteCommand_Gcode descreteMoveXYE1 = {MOVE_COMMAND,        50,   100, 0,    100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMoveXYE1 = {MOVE_COMMAND,         5,    10, 0,     10,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMoveXYE1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMoveXYE1.FnXY)-fabs(descreteMoveXYE1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMoveXYE1.FnXY);
@@ -4421,7 +4421,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     CHECK(maxSpeedXY > descreteMove1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove1.FnXY)-fabs(descreteMove1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove1.FnXY);
-    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     20100, 10050, 0, 20100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     20010, 10005, 0, 20010,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMove2.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove2.FnXY)-fabs(descreteMove2.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove2.FnXY);
@@ -4513,7 +4513,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     CHECK(maxSpeedXY > descreteMove1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove1.FnXY)-fabs(descreteMove1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove1.FnXY);
-    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     10050, 20100, 0, 20100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     10005, 20010, 0, 20010,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMove2.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove2.FnXY)-fabs(descreteMove2.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove2.FnXY);
@@ -4606,7 +4606,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     CHECK(maxSpeedXY > descreteMove1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove1.FnXY)-fabs(descreteMove1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove1.FnXY);
-    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     10050, 10050, 0, 20100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     10005, 10005, 0, 20010,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMove2.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove2.FnXY)-fabs(descreteMove2.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove2.FnXY);
@@ -4683,7 +4683,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     v1 = getCommandBufferElement_Gcode(1).FnY;              v2 = getCommandBufferElement_Gcode(2).FnY;                     v3 = getCommandBufferElement_Gcode(3).FnY;                           v4 = getCommandBufferElement_Gcode(4).FnY;
     CHECK( fabs(0 - v1) < floatError );                     CHECK( fabs(speedTargetY - v2) < 0.01*fabs(v2)+floatError );   CHECK( fabs(speedTargetY - v3) < 0.01*fabs(v3)+floatError );         CHECK( fabs(v4) < fabs(speedTargetY) );
     v1 = getCommandBufferElement_Gcode(1).FnE;              v2 = getCommandBufferElement_Gcode(2).FnE;                     v3 = getCommandBufferElement_Gcode(3).FnE;                           v4 = getCommandBufferElement_Gcode(4).FnE;
-    CHECK_EQUAL(speedTargetE, v3);
+    CHECK( fabs(speedTargetE - v3) < 0.1/*floatError*/ );
     CHECK( fabs(0 - v1) < floatError );                     CHECK( fabs(speedTargetE - v2) < 0.01*fabs(v2)+floatError );   CHECK( fabs(speedTargetE - v3) < 0.01*fabs(v3)+floatError );         CHECK( fabs(v4) < fabs(speedTargetE) );
     a1 = getCommandBufferElement_Gcode(1).AnX;              a2 = getCommandBufferElement_Gcode(2).AnX;                     a3 = getCommandBufferElement_Gcode(3).AnX;                           a4 = getCommandBufferElement_Gcode(4).AnX;
     CHECK( fabs(aDefault*cosX - a1) < floatError );         CHECK( fabs(0 - a2) < floatError );                            CHECK( fabs(-aDefault*cosX - a3) < 0.01*fabs(a3)+floatError );       CHECK( fabs(-aDefault*cosX - a4) < 0.01*fabs(a4)+floatError );
@@ -4699,7 +4699,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     CHECK(maxSpeedXY > descreteMove1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove1.FnXY)-fabs(descreteMove1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove1.FnXY);
-    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     -20100, -10050, 0, -20100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     -20010, -10005, 0, -20010,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMove2.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove2.FnXY)-fabs(descreteMove2.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove2.FnXY);
@@ -4791,7 +4791,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     CHECK(maxSpeedXY > descreteMove1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove1.FnXY)-fabs(descreteMove1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove1.FnXY);
-    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     -10050, -20100, 0, -20100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     -10005, -20010, 0, -20010,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMove2.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove2.FnXY)-fabs(descreteMove2.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove2.FnXY);
@@ -4883,7 +4883,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     CHECK(maxSpeedXY > descreteMove1.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove1.FnXY)-fabs(descreteMove1.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove1.FnXY);
-    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     -10050, -10050, 0, -20100,     1000, 0, 2000,     0, 0};
+    const descreteCommand_Gcode descreteMove2 = {MOVE_COMMAND,     -10005, -10005, 0, -20010,     1000, 0, 2000,     0, 0};
     CHECK(maxSpeedXY > descreteMove2.FnXY);
     CHECK(fabs(fabs((STEPS_PER_MM_E/STEPS_PER_MM_XY)*descreteMove2.FnXY)-fabs(descreteMove2.FnE))<floatError);
     CHECK(maxSpeedXY > descreteMove2.FnXY);
@@ -5108,7 +5108,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
     float speedTargetX1 = cosX1*descreteMoveSlow1.FnXY;
     float speedTargetY1 = cosY1*descreteMoveSlow1.FnXY;
 
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20090, 10050, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20009, 10005, 0, 0,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance2 = sqrt(pow((float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn),2)+pow((float)(descreteMoveSlow2.Yn-descreteMoveSlow1.Yn),2));
     float cosX2 = (float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn)/distance2;
@@ -5151,7 +5151,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XY_conserve_sp
     y1 = getCommandBufferElement_Gcode(1).dYn;                  y2 = getCommandBufferElement_Gcode(2).dYn;                         y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
     CHECK(y1 > 0);                                              CHECK(y2 > 0);                                                     CHECK(y3 > 0);                                                  CHECK(y4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
-    CHECK_EQUAL(lroundf(pow(descreteMoveSlow1.FnXY, 2)/2/aDefault), lroundf( sqrtf(pow(x3,2)+pow(y3,2)) + sqrtf(pow(x4,2)+pow(y4,2)) ));
+    CHECK( labs(lroundf(pow(descreteMoveSlow1.FnXY, 2)/2/aDefault) - ( lroundf( sqrtf(pow(x3,2)+pow(y3,2)) + sqrtf(pow(x4,2)+pow(y4,2)) ) )) <= 1);
     v1 = getCommandBufferElement_Gcode(1).FnX;                  v2 = getCommandBufferElement_Gcode(2).FnX;                         v3 = getCommandBufferElement_Gcode(3).FnX;                      v4 = getCommandBufferElement_Gcode(4).FnX;
     CHECK( fabs(0 - v1) < floatError );                         CHECK( fabs(speedTargetX1 - v2) < 0.01*fabs(v2)+floatError );      CHECK( fabs(speedTargetX1 - v3) < 0.01*fabs(v3)+floatError );   CHECK( fabs(v4) < fabs(descreteMoveSlow1.FnXY*cosX2) );
     v1 = getCommandBufferElement_Gcode(1).FnY;                  v2 = getCommandBufferElement_Gcode(2).FnY;                         v3 = getCommandBufferElement_Gcode(3).FnY;                      v4 = getCommandBufferElement_Gcode(4).FnY;
@@ -5174,7 +5174,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     float speedTargetY1 = cosY1*descreteMoveSlow1.FnXY;
     float speedTargetE1 = cosE1*descreteMoveSlow1.FnXY;
 
-    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20090, 10050, 0, 20100,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteMoveSlow2 = {MOVE_COMMAND,     20009, 10005, 0, 20010,     1000, 0, 0,     0, 0};
     CHECK(maxSpeedXY > descreteMoveSlow2.FnXY);
     float distance2 = sqrt(pow((float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn),2)+pow((float)(descreteMoveSlow2.Yn-descreteMoveSlow1.Yn),2));
     float cosX2 = (float)(descreteMoveSlow2.Xn-descreteMoveSlow1.Xn)/distance2;
@@ -5227,7 +5227,7 @@ TEST(Descrete_command_analyser_Gcode, two_commands_move_slow_stop_XYE_conserve_s
     y1 = getCommandBufferElement_Gcode(1).dYn;                  y2 = getCommandBufferElement_Gcode(2).dYn;                         y3 = getCommandBufferElement_Gcode(3).dYn;                      y4 = getCommandBufferElement_Gcode(4).dYn;
     CHECK(y1 > 0);                                              CHECK(y2 > 0);                                                     CHECK(y3 > 0);                                                  CHECK(y4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.Yn, y1+y2+y3+y4);
-    CHECK_EQUAL(lroundf(pow(descreteMoveSlow1.FnXY, 2)/2/aDefault), lroundf( sqrtf(pow(x3,2)+pow(y3,2)) + sqrtf(pow(x4,2)+pow(y4,2)) ));
+    CHECK( labs(lroundf(pow(descreteMoveSlow1.FnXY, 2)/2/aDefault) - ( lroundf( sqrtf(pow(x3,2)+pow(y3,2)) + sqrtf(pow(x4,2)+pow(y4,2)) ) )) <= 1);
     e1 = getCommandBufferElement_Gcode(1).dEn;                  e2 = getCommandBufferElement_Gcode(2).dEn;                         e3 = getCommandBufferElement_Gcode(3).dEn;                      e4 = getCommandBufferElement_Gcode(4).dEn;
     CHECK(e1 > 0);                                              CHECK(e2 > 0);                                                     CHECK(e3 > 0);                                                  CHECK(e4 > 0);
     CHECK_EQUAL(descreteMoveSlow2.En, e1+e2+e3+e4);
@@ -6950,5 +6950,82 @@ TEST(Descrete_command_analyser_Gcode, repeate_the_desctreate_command)
     CHECK(descreteCommandIsRepeated(command1));
     CHECK(!descreteCommandIsRepeated(command2));
     CHECK(!descreteCommandIsRepeated(command3));
+}
+
+
+TEST(Descrete_command_analyser_Gcode, short_travel_xy_1)
+{
+    const descreteCommand_Gcode command = {MOVE_COMMAND,  20,   112, 0, 0,     2000, 0, 0,     0, 0};
+
+    addElementToDescreteCommandBuffer_Gcode(command);
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+}
+
+TEST(Descrete_command_analyser_Gcode, short_travel_xy_2)
+{
+    const descreteCommand_Gcode command = {MOVE_COMMAND,  53,   91, 0, 0,     2000, 0, 0,     0, 0};
+
+    addElementToDescreteCommandBuffer_Gcode(command);
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+}
+
+TEST(Descrete_command_analyser_Gcode, motion_near_critical_angle_1)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND,  53,   91, 0, 0,     2000, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  73,  203, 0, 0,     2000, 0, 0,     0, 0};
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    long dxNext = getDescreteCommandBufferElement_Gcode(3).Xn - getDescreteCommandBufferElement_Gcode(2).Xn;
+    long dyNext = getDescreteCommandBufferElement_Gcode(3).Yn - getDescreteCommandBufferElement_Gcode(2).Yn;
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
+
+    long dxPrev = getDescreteCommandBufferElement_Gcode(2).Xn - getDescreteCommandBufferElement_Gcode(1).Xn;
+    long dyPrev = getDescreteCommandBufferElement_Gcode(2).Yn - getDescreteCommandBufferElement_Gcode(1).Yn;
+
+    CHECK_EQUAL(dxNext, 20);
+    CHECK_EQUAL(dxPrev, 20);
+    CHECK_EQUAL(dyNext, 112);
+    CHECK_EQUAL(dyPrev, 112);
+}
+
+
+TEST(Descrete_command_analyser_Gcode, motion_near_critical_angle_2)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND, -23,  905, 0, 0,     2000, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  30,  996, 0, 0,     2000, 0, 0,     0, 0};
+    const descreteCommand_Gcode command3 = {MOVE_COMMAND,  50, 1108, 0, 0,     2000, 0, 0,     0, 0};
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 3, checkFreeSpaceCommandBuffer_Gcode());
+
+    addElementToDescreteCommandBuffer_Gcode(command3);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 5, checkFreeSpaceCommandBuffer_Gcode());
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 7, checkFreeSpaceCommandBuffer_Gcode());
 }
 
