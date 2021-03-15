@@ -7029,3 +7029,119 @@ TEST(Descrete_command_analyser_Gcode, motion_near_critical_angle_2)
     CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 7, checkFreeSpaceCommandBuffer_Gcode());
 }
 
+TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_at_the_end_X)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND,  24,  0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  24,  0, 0, 0,     1200, 0, 0,     0, 0};
+
+    long  x1, x2;
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command1.Xn, x1+x2);
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command1.Xn, x1+x2);
+}
+
+TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_X)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND,  24,  0, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  24,  0, 0, 0,     1200, 0, 0,     0, 0};
+    const descreteCommand_Gcode command3 = {MOVE_COMMAND,  40,  0, 0, 0,     1000, 0, 0,     0, 0};
+
+    long  x1, x2;
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command1.Xn, x1+x2);
+
+    addElementToDescreteCommandBuffer_Gcode(command3);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command2.Xn, x1+x2);
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(3).dXn;                      x2 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command3.Xn-command2.Xn, x1+x2);
+}
+
+
+TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_XY)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND,  24,  10, 0, 0,     1000, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  24,  10, 0, 0,     1200, 0, 0,     0, 0};
+    const descreteCommand_Gcode command3 = {MOVE_COMMAND,  40,  16, 0, 0,     1000, 0, 0,     0, 0};
+
+    long  x1, x2;
+    long  y1, y2;
+
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command1.Xn, x1+x2);
+    y1 = getCommandBufferElement_Gcode(1).dYn;                      y2 = getCommandBufferElement_Gcode(2).dYn;
+    CHECK(y1 > 0);                                                  CHECK(y2 > 0);
+    CHECK_EQUAL(command1.Yn, y1+y2);
+
+    addElementToDescreteCommandBuffer_Gcode(command3);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 2, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;                      x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command1.Xn, x1+x2);
+    y1 = getCommandBufferElement_Gcode(1).dYn;                      y2 = getCommandBufferElement_Gcode(2).dYn;
+    CHECK(y1 > 0);                                                  CHECK(y2 > 0);
+    CHECK_EQUAL(command1.Yn, y1+y2);
+
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(3).dXn;                      x2 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 > 0);                                                  CHECK(x2 > 0);
+    CHECK_EQUAL(command3.Xn-command2.Xn, x1+x2);
+    y1 = getCommandBufferElement_Gcode(3).dYn;                      y2 = getCommandBufferElement_Gcode(4).dYn;
+    CHECK(y1 > 0);                                                  CHECK(y2 > 0);
+    CHECK_EQUAL(command3.Yn-command2.Yn, y1+y2);
+
+}
+

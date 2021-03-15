@@ -144,6 +144,7 @@ static _Bool conserveSpeedStart(long Xn, long Yn, long Zn)
         return false;
     if (lastCommand().type != MOVE_COMMAND)
         return false;
+
     long XnPrevious = lastCommand().dXn;
     long YnPrevious = lastCommand().dYn;
     float FnXPrevious = lastCommand().FnX;
@@ -156,6 +157,12 @@ static _Bool conserveSpeedStart(long Xn, long Yn, long Zn)
         return false;
     if (XnPrevious == 0 && YnPrevious == 0)
         return false;
+
+    float vStart = sqrtf( lastCommand().FnX*lastCommand().FnX + 2*lastCommand().AnX*(float)lastCommand().dXn
+                     + lastCommand().FnY*lastCommand().FnY + 2*lastCommand().AnY*(float)lastCommand().dYn );
+    if( vStart < (float)MIN_SPEED_MM_MIN_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE )
+        return false;
+
     return true;
 }
 /*
