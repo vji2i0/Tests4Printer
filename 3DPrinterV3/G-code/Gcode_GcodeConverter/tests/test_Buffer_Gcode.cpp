@@ -7056,7 +7056,7 @@ TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_at_the_end_X)
     CHECK_EQUAL(command1.Xn, x1+x2);
 }
 
-TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_X)
+TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_X_1)
 {
     const descreteCommand_Gcode command1 = {MOVE_COMMAND,  24,  0, 0, 0,     1000, 0, 0,     0, 0};
     const descreteCommand_Gcode command2 = {MOVE_COMMAND,  24,  0, 0, 0,     1200, 0, 0,     0, 0};
@@ -7145,3 +7145,157 @@ TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_XY)
 
 }
 
+
+
+TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_X_2)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND,  17,  0, 0, 0,     6400, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  27,  0, 0, 0,     800,  0, 0,     0, 0};
+    const descreteCommand_Gcode command3 = {MOVE_COMMAND,  48,  0, 0, 0,     800,  0, 0,     0, 0};
+    const descreteCommand_Gcode command4 = {MOVE_COMMAND,  48,  0, 0, 0,     6400, 0, 0,     0, 0};
+    const descreteCommand_Gcode command5 = {MOVE_COMMAND,  64,  0, 0, 0,     800,  0, 0,     0, 0};
+
+    long  x1, x2, x3;
+    float v1, v2;
+    float a1, a2, a3;
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 1, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;
+    CHECK(x1 > 0);
+    CHECK_EQUAL(17, x1);
+    CHECK_EQUAL(command1.Xn, x1);
+
+
+    addElementToDescreteCommandBuffer_Gcode(command3);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 3, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;     x2 = getCommandBufferElement_Gcode(2).dXn;     x3 = getCommandBufferElement_Gcode(3).dXn;
+    CHECK(x1 > 0);                                 CHECK(x2 > 0);                                 CHECK(x3 > 0);
+    CHECK_EQUAL(17, x1);                           CHECK_EQUAL(7, x2);                            CHECK_EQUAL(3, x3);
+    CHECK_EQUAL(command2.Xn, x1+x2+x3);
+    a1 = getCommandBufferElement_Gcode(1).AnX;     a2 = getCommandBufferElement_Gcode(2).AnX;     a3 = getCommandBufferElement_Gcode(3).AnX;
+    CHECK(a1 > 0);                                 CHECK(a2 > 0);                                 CHECK(a3 == 0);
+
+
+    addElementToDescreteCommandBuffer_Gcode(command4);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(3).dXn;     x2 = getCommandBufferElement_Gcode(4).dXn;
+    CHECK(x1 > 0);                                 CHECK(x2 > 0);
+    CHECK_EQUAL(3, x1);                            CHECK_EQUAL(21, x2);
+    v1 = getCommandBufferElement_Gcode(3).FnX;     v2 = getCommandBufferElement_Gcode(4).FnX;
+    CHECK( v1 > 0 );                               CHECK( v2 > 0);
+    a1 = getCommandBufferElement_Gcode(3).AnX;     a2 = getCommandBufferElement_Gcode(4).AnX;
+    CHECK(a1 < floatError);                        CHECK(a2 < floatError);
+    CHECK_EQUAL(command3.Xn-command2.Xn, x2);
+
+
+    addElementToDescreteCommandBuffer_Gcode(command5);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 4, checkFreeSpaceCommandBuffer_Gcode());
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 6, checkFreeSpaceCommandBuffer_Gcode());
+
+
+}
+
+/*
+TEST(Descrete_command_analyser_Gcode, change_speed_without_mooving_X_2)
+{
+    const descreteCommand_Gcode command1 = {MOVE_COMMAND,  17,  0, 0, 0,     6400, 0, 0,     0, 0};
+    const descreteCommand_Gcode command2 = {MOVE_COMMAND,  27,  0, 0, 0,     800,  0, 0,     0, 0};
+    const descreteCommand_Gcode command3 = {MOVE_COMMAND,  48,  0, 0, 0,     800,  0, 0,     0, 0};
+    const descreteCommand_Gcode command4 = {MOVE_COMMAND,  48,  0, 0, 0,     6400, 0, 0,     0, 0};
+    const descreteCommand_Gcode command5 = {MOVE_COMMAND,  64,  0, 0, 0,     800,  0, 0,     0, 0};
+
+    long  x1, x2, x3;
+    float v1, v2, v3;
+    float a1, a2, a3;
+
+    addElementToDescreteCommandBuffer_Gcode(command1);
+    addElementToDescreteCommandBuffer_Gcode(command2);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 1, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;
+    CHECK(x1 > 0);
+    CHECK_EQUAL(17, x1);
+    CHECK_EQUAL(command1.Xn, x1);
+
+
+    addElementToDescreteCommandBuffer_Gcode(command3);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 3, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;     x2 = getCommandBufferElement_Gcode(2).dXn;     x3 = getCommandBufferElement_Gcode(3).dXn;
+    CHECK(x1 > 0);                                 CHECK(x2 > 0);                                 CHECK(x3 > 0);
+    CHECK_EQUAL(17, x1);                           CHECK_EQUAL(7, x2);                            CHECK_EQUAL(3, x3);
+    CHECK_EQUAL(command2.Xn, x1+x2+x3);
+    a1 = getCommandBufferElement_Gcode(1).AnX;     a2 = getCommandBufferElement_Gcode(2).AnX;     a3 = getCommandBufferElement_Gcode(3).AnX;
+    CHECK(a1 > 0);                                 CHECK(a2 > 0);                                 CHECK(a3 == 0);
+
+    addElementToDescreteCommandBuffer_Gcode(command4);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 5, checkFreeSpaceCommandBuffer_Gcode());
+
+    x1 = getCommandBufferElement_Gcode(3).dXn;     x2 = getCommandBufferElement_Gcode(4).dXn;     x3 = getCommandBufferElement_Gcode(5).dXn;
+    CHECK(x1 == 0);                                CHECK(x2 > 0);                                 CHECK(x3 > 0);
+    CHECK_EQUAL(0, x1);                            CHECK_EQUAL(3, x2);                            CHECK_EQUAL(21, x3);
+    v1 = getCommandBufferElement_Gcode(3).FnX;     v2 = getCommandBufferElement_Gcode(4).FnX;     v3 = getCommandBufferElement_Gcode(5).FnX;
+    CHECK( fabs(v1 - 800) < floatError );          CHECK( fabs(v2 - 800) < floatError );          CHECK( fabs(v3 - 748.331) < floatError );
+    a1 = getCommandBufferElement_Gcode(3).AnX;     a2 = getCommandBufferElement_Gcode(4).AnX;     a3 = getCommandBufferElement_Gcode(5).AnX;
+    CHECK(fabs(a1) < floatError);                  CHECK(fabs(a2 + aDefault) < floatError);       CHECK(fabs(a3 + aDefault) < floatError);
+    CHECK_EQUAL(command3.Xn-command2.Xn, x3);
+
+
+    addElementToDescreteCommandBuffer_Gcode(command5);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 5, checkFreeSpaceCommandBuffer_Gcode());
+
+    addElementToDescreteCommandBuffer_Gcode(defaultDescreteCommand);
+    descreteCommandAnalyser_Gcode();
+
+    CHECK_EQUAL(COMMAND_BUFFER_LENGTH - 7, checkFreeSpaceCommandBuffer_Gcode());
+
+
+
+
+
+    x1 = getCommandBufferElement_Gcode(1).dXn;     x2 = getCommandBufferElement_Gcode(2).dXn;
+    CHECK(x1 > 0);                                 CHECK(x2 > 0);
+    CHECK_EQUAL(17, x1);                           CHECK_EQUAL(7, x2);
+    CHECK_EQUAL(24, x1+x2);
+    v1 = getCommandBufferElement_Gcode(1).FnX;     v2 = getCommandBufferElement_Gcode(2).FnX;
+    CHECK( fabs(v1 - 0) < floatError );            CHECK( fabs(v2 - 673.3) < floatError );
+    a1 = getCommandBufferElement_Gcode(1).AnX;     a2 = getCommandBufferElement_Gcode(2).AnX;
+    CHECK(a1 > 0);                                 CHECK(a2 > 0);
+
+    x1 = getCommandBufferElement_Gcode(3).dXn;     x2 = getCommandBufferElement_Gcode(4).dXn;     x3 = getCommandBufferElement_Gcode(5).dXn;
+    CHECK(x1 == 0);                                CHECK(x2 > 0);                                 CHECK(x3 > 0);
+    CHECK_EQUAL(0, x1);                            CHECK_EQUAL(3, x2);                            CHECK_EQUAL(21, x3);
+    v1 = getCommandBufferElement_Gcode(3).FnX;     v2 = getCommandBufferElement_Gcode(4).FnX;     v3 = getCommandBufferElement_Gcode(5).FnX;
+    CHECK( fabs(v1 - 800) < floatError );          CHECK( fabs(v2 - 800) < floatError );          CHECK( fabs(v3 - 748.331) < floatError );
+    a1 = getCommandBufferElement_Gcode(3).AnX;     a2 = getCommandBufferElement_Gcode(4).AnX;     a3 = getCommandBufferElement_Gcode(5).AnX;
+    CHECK(fabs(a1) < floatError);                  CHECK(fabs(a2 + aDefault) < floatError);       CHECK(fabs(a3 + aDefault) < floatError);
+    CHECK(a1 == 0);                                CHECK(a2 < 0);                                 CHECK(a3 < 0);
+    CHECK_EQUAL(command3.Xn-command2.Xn, x3);
+
+}
+*/

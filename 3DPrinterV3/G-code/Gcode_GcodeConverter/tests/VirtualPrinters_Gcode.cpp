@@ -40,6 +40,15 @@ const command_Gcode moveXYwithoutAccelerationNegative = {MOVE_COMMAND, -200, 100
 const command_Gcode moveXwithAccelerationPositive =     {MOVE_COMMAND, 100, 0, 0, 0,     0, 0, 0, 0,    10, 0, 0,   0, 0};
 const command_Gcode moveXwithAccelerationNegative =     {MOVE_COMMAND, -800, 0, 0, 0,    -600, 0, 0, 0,    100, 0, 0,   0, 0};
 const command_Gcode moveXwithAccelerationNegative2 =    {MOVE_COMMAND, -1300, 0, 0, 0,   -677, 0, 0, 0,    101, 0, 0,   0, 0};
+const command_Gcode moveXZeroDistanseToTravel =         {MOVE_COMMAND,  0, 0, 0, 0,     800, 0, 0, 0,    0, 0, 0,   0, 0};
+
+
+const command_Gcode moveX_bagged_1 = {MOVE_COMMAND,  17, 0, 0, 0,     0, 0, 0, 0,       13333.3, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_2 = {MOVE_COMMAND,  7, 0, 0, 0,     673.3, 0, 0, 0,    13333.3, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_3 = {MOVE_COMMAND,  0, 0, 0, 0,     800, 0, 0, 0,      0, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_4 = {MOVE_COMMAND,  3, 0, 0, 0,     800, 0, 0, 0,      -13333.3, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_5 = {MOVE_COMMAND,  21, 0, 0, 0,    748.331, 0, 0, 0,  -13333.3, 0, 0,   0, 0};
+
 
 TEST_GROUP(VirtualPrinters_Gcode)
 {
@@ -168,4 +177,40 @@ TEST(VirtualPrinters_Gcode, move_x_with_acceleration_sequential_commands)
     sendCommandToPrinter_Gcode(moveXwithAccelerationNegative2);
     while (!evaluatePrinter_Gcode()) {}
     CHECK_EQUAL(moveXwithAccelerationNegative2.dXn, getCurrentX_Gcode());
+}
+
+TEST(VirtualPrinters_Gcode, move_x_zero_distanse_to_travel)
+{
+    sendCommandToPrinter_Gcode(moveXwithAccelerationPositive);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveXwithAccelerationPositive.dXn, getCurrentX_Gcode());
+
+    sendCommandToPrinter_Gcode(moveXZeroDistanseToTravel);
+    //while (!evaluatePrinter_Gcode()) {}
+    CHECK(evaluatePrinter_Gcode());
+    CHECK_EQUAL(moveXZeroDistanseToTravel.dXn, getCurrentX_Gcode());
+}
+
+TEST(VirtualPrinters_Gcode, move_x_strange_bug)
+{
+    sendCommandToPrinter_Gcode(moveX_bagged_1);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveX_bagged_1.dXn, getCurrentX_Gcode());
+
+    sendCommandToPrinter_Gcode(moveX_bagged_2);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveX_bagged_2.dXn, getCurrentX_Gcode());
+
+    sendCommandToPrinter_Gcode(moveX_bagged_3);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveX_bagged_3.dXn, getCurrentX_Gcode());
+
+    sendCommandToPrinter_Gcode(moveX_bagged_4);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveX_bagged_4.dXn, getCurrentX_Gcode());
+
+    sendCommandToPrinter_Gcode(moveX_bagged_5);
+    while (!evaluatePrinter_Gcode()) {}
+    CHECK_EQUAL(moveX_bagged_5.dXn, getCurrentX_Gcode());
+
 }
