@@ -213,7 +213,7 @@ TEST(GcodeConverter_Gcode, ignore_G28_home_without_parameters)
 TEST(GcodeConverter_Gcode, convert_M104_set_extruder_temperature)
 {
     convertCommand_Gcode("G1 X999.99 Y999.99 Z999.99 E999.99 F9999.99");
-    convertCommand_Gcode("M104 T100.04");
+    convertCommand_Gcode("M104 S100.04");
 
     CHECK_EQUAL(HEAT_EXTRUDER_COMMAND, getConvertedCommand_Gcode().type);
     CHECK( fabs(100.04 - getConvertedCommand_Gcode().extrT) < floatError );
@@ -227,7 +227,7 @@ TEST(GcodeConverter_Gcode, convert_M104_set_extruder_temperature)
 TEST(GcodeConverter_Gcode, convert_M140_set_bed_temperature)
 {
     convertCommand_Gcode("G1 X999.99 Y999.99 Z999.99 E999.99 F9999.99");
-    convertCommand_Gcode("M140 T100.04");
+    convertCommand_Gcode("M140 S100.04");
 
     CHECK_EQUAL(HEAT_BED_COMMAND, getConvertedCommand_Gcode().type);
     CHECK( fabs(100.04 - getConvertedCommand_Gcode().bedT) < floatError );
@@ -241,7 +241,7 @@ TEST(GcodeConverter_Gcode, convert_M140_set_bed_temperature)
 TEST(GcodeConverter_Gcode, convert_M109_wait_for_extruder_temperature)
 {
     convertCommand_Gcode("G1 X999.99 Y999.99 Z999.99 E999.99 F9999.99");
-    convertCommand_Gcode("M109 T100.04");
+    convertCommand_Gcode("M109 S100.04");
 
     CHECK_EQUAL(WAIT_HEAT_EXTRUDER_COMMAND, getConvertedCommand_Gcode().type);
     CHECK( fabs(100.04 - getConvertedCommand_Gcode().extrT) < floatError );
@@ -255,7 +255,7 @@ TEST(GcodeConverter_Gcode, convert_M109_wait_for_extruder_temperature)
 TEST(GcodeConverter_Gcode, convert_M190_wait_for_bed_temperature)
 {
     convertCommand_Gcode("G1 X999.99 Y999.99 Z999.99 E999.99 F9999.99");
-    convertCommand_Gcode("M190 T100.04");
+    convertCommand_Gcode("M190 S100.04");
 
     CHECK_EQUAL(WAIT_HEAT_BED_COMMAND, getConvertedCommand_Gcode().type);
     CHECK( fabs(100.04 - getConvertedCommand_Gcode().bedT) < floatError );
@@ -269,8 +269,8 @@ TEST(GcodeConverter_Gcode, convert_M190_wait_for_bed_temperature)
 
 TEST(GcodeConverter_Gcode, set_bed_set_extruder_wait_bed)
 {
-    convertCommand_Gcode("M140 T100.01");
-    convertCommand_Gcode("M104 T200.02");
+    convertCommand_Gcode("M140 S100.01");
+    convertCommand_Gcode("M104 S200.02");
 
     CHECK( fabs(100.01 - getConvertedCommand_Gcode().bedT) < floatError );
     CHECK( fabs(200.02 - getConvertedCommand_Gcode().extrT) < floatError );

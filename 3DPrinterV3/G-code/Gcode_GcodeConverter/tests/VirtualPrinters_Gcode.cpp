@@ -25,29 +25,43 @@ extern "C"
 #include "VirtualPrinters_Gcode.h"
 
 #include "Buffer_Gcode.h"
+#include "temperature.h"
+
+#include "math.h"
+
+#include "CppUTestExt/MockSupport_c.h"
 }
 
-const command_Gcode moveXwithoutAccelerationPositive =  {MOVE_COMMAND, 100, 0, 0, 0,    10, 0, 0, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveXwithoutAccelerationNegative =  {MOVE_COMMAND, -100, 0, 0, 0,    -10, 0, 0, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveYwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 100, 0, 0,    0, 10, 0, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveYwithoutAccelerationNegative =  {MOVE_COMMAND, 0, -100, 0, 0,   0, -10, 0, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveZwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 0, 100, 0,    0, 0, 10, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveZwithoutAccelerationNegative =  {MOVE_COMMAND, 0, 0, -100, 0,   0, 0, -10, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveEwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 0, 0, 100,    0, 0, 0, 10,    0, 0, 0,   0, 0};
-const command_Gcode moveEwithoutAccelerationNegative =  {MOVE_COMMAND, 0, 0, 0, -100,   0, 0, 0, -10,    0, 0, 0,   0, 0};
-const command_Gcode moveXYwithoutAccelerationPositive = {MOVE_COMMAND, 200, 100, 0, 0,    20, 10, 0, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveXYwithoutAccelerationNegative = {MOVE_COMMAND, -200, 100, 0, 0,    -20, 10, 0, 0,    0, 0, 0,   0, 0};
-const command_Gcode moveXwithAccelerationPositive =     {MOVE_COMMAND, 100, 0, 0, 0,     0, 0, 0, 0,    10, 0, 0,   0, 0};
-const command_Gcode moveXwithAccelerationNegative =     {MOVE_COMMAND, -800, 0, 0, 0,    -600, 0, 0, 0,    100, 0, 0,   0, 0};
-const command_Gcode moveXwithAccelerationNegative2 =    {MOVE_COMMAND, -1300, 0, 0, 0,   -677, 0, 0, 0,    101, 0, 0,   0, 0};
-const command_Gcode moveXZeroDistanseToTravel =         {MOVE_COMMAND,  0, 0, 0, 0,     800, 0, 0, 0,    0, 0, 0,   0, 0};
+const command_Gcode emptyCommand =  {EMPTY_COMMAND, 0, 0, 0, 0,    10, 0, 0, 0,    0, 0, 0, 0,   0, 0};
+
+const command_Gcode moveXwithoutAccelerationPositive =  {MOVE_COMMAND, 100, 0, 0, 0,    10, 0, 0, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveXwithoutAccelerationNegative =  {MOVE_COMMAND, -100, 0, 0, 0,    -10, 0, 0, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveYwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 100, 0, 0,    0, 10, 0, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveYwithoutAccelerationNegative =  {MOVE_COMMAND, 0, -100, 0, 0,   0, -10, 0, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveZwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 0, 100, 0,    0, 0, 10, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveZwithoutAccelerationNegative =  {MOVE_COMMAND, 0, 0, -100, 0,   0, 0, -10, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveEwithoutAccelerationPositive =  {MOVE_COMMAND, 0, 0, 0, 100,    0, 0, 0, 10,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveEwithoutAccelerationNegative =  {MOVE_COMMAND, 0, 0, 0, -100,   0, 0, 0, -10,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveXYwithoutAccelerationPositive = {MOVE_COMMAND, 200, 100, 0, 0,    20, 10, 0, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveXYwithoutAccelerationNegative = {MOVE_COMMAND, -200, 100, 0, 0,    -20, 10, 0, 0,    0, 0, 0, 0,   0, 0};
+const command_Gcode moveXwithAccelerationPositive =     {MOVE_COMMAND, 100, 0, 0, 0,     0, 0, 0, 0,    10, 0, 0, 0,   0, 0};
+const command_Gcode moveXwithAccelerationNegative =     {MOVE_COMMAND, -800, 0, 0, 0,    -600, 0, 0, 0,    100, 0, 0, 0,   0, 0};
+const command_Gcode moveXwithAccelerationNegative2 =    {MOVE_COMMAND, -1300, 0, 0, 0,   -677, 0, 0, 0,    101, 0, 0, 0,   0, 0};
+const command_Gcode moveXZeroDistanseToTravel =         {MOVE_COMMAND,  0, 0, 0, 0,     800, 0, 0, 0,    0, 0, 0, 0,   0, 0};
 
 
-const command_Gcode moveX_bagged_1 = {MOVE_COMMAND,  17, 0, 0, 0,     0, 0, 0, 0,       13333.3, 0, 0,   0, 0};
-const command_Gcode moveX_bagged_2 = {MOVE_COMMAND,  7, 0, 0, 0,     673.3, 0, 0, 0,    13333.3, 0, 0,   0, 0};
-const command_Gcode moveX_bagged_3 = {MOVE_COMMAND,  0, 0, 0, 0,     800, 0, 0, 0,      0, 0, 0,   0, 0};
-const command_Gcode moveX_bagged_4 = {MOVE_COMMAND,  3, 0, 0, 0,     800, 0, 0, 0,      -13333.3, 0, 0,   0, 0};
-const command_Gcode moveX_bagged_5 = {MOVE_COMMAND,  21, 0, 0, 0,    748.331, 0, 0, 0,  -13333.3, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_1 = {MOVE_COMMAND,  17, 0, 0, 0,     0, 0, 0, 0,       13333.3, 0, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_2 = {MOVE_COMMAND,  7, 0, 0, 0,     673.3, 0, 0, 0,    13333.3, 0, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_3 = {MOVE_COMMAND,  0, 0, 0, 0,     800, 0, 0, 0,      0, 0, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_4 = {MOVE_COMMAND,  3, 0, 0, 0,     800, 0, 0, 0,      -13333.3, 0, 0, 0,   0, 0};
+const command_Gcode moveX_bagged_5 = {MOVE_COMMAND,  21, 0, 0, 0,    748.331, 0, 0, 0,  -13333.3, 0, 0, 0,   0, 0};
+
+const command_Gcode SetExtruder1Temperature = {HEAT_EXTRUDER_COMMAND,  0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0,   200, 0};
+const command_Gcode SetBedTemperature =       {HEAT_BED_COMMAND,  0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0,   0, 100};
+
+const command_Gcode WaitForExtruder1Temperature = {WAIT_HEAT_EXTRUDER_COMMAND,  0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0,   200, 0};
+const command_Gcode WaitForBedTemperature =       {WAIT_HEAT_BED_COMMAND,  0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0,   0, 100};
+
 
 
 TEST_GROUP(VirtualPrinters_Gcode)
@@ -58,6 +72,8 @@ TEST_GROUP(VirtualPrinters_Gcode)
     }
     void teardown()
     {
+        mock_c()->checkExpectations();
+        mock_c()->clear();
     }
 };
 
@@ -212,5 +228,57 @@ TEST(VirtualPrinters_Gcode, move_x_strange_bug)
     sendCommandToPrinter_Gcode(moveX_bagged_5);
     while (!evaluatePrinter_Gcode()) {}
     CHECK_EQUAL(moveX_bagged_5.dXn, getCurrentX_Gcode());
-
 }
+
+TEST(VirtualPrinters_Gcode, empty_command)
+{
+    sendCommandToPrinter_Gcode(emptyCommand);
+    CHECK(evaluatePrinter_Gcode())
+}
+
+TEST(VirtualPrinters_Gcode, set_extruder1_temperature)
+{
+    sendCommandToPrinter_Gcode(SetExtruder1Temperature);
+    CHECK(evaluatePrinter_Gcode())
+    CHECK_EQUAL(SetExtruder1Temperature.extrT, roundf(getTargetExtruder1_Temperature()));
+}
+
+TEST(VirtualPrinters_Gcode, set_bed_temperature)
+{
+    sendCommandToPrinter_Gcode(SetBedTemperature);
+    CHECK(evaluatePrinter_Gcode())
+    CHECK_EQUAL(SetBedTemperature.bedT, roundf(getTargetBed_Temperature()));
+}
+
+TEST(VirtualPrinters_Gcode, wait_for_extruder1_temperature)
+{
+    sendCommandToPrinter_Gcode(WaitForExtruder1Temperature);
+    CHECK(!evaluatePrinter_Gcode())
+    CHECK_EQUAL(WaitForExtruder1Temperature.extrT, roundf(getTargetExtruder1_Temperature()));
+    regNewTemperature_Extruder1_Temperature(WaitForExtruder1Temperature.extrT - 20);
+    CHECK(!moveComleted());
+    CHECK(!evaluatePrinter_Gcode());
+    regNewTemperature_Extruder1_Temperature(WaitForExtruder1Temperature.extrT - 10);
+    CHECK(!moveComleted());
+    CHECK(!evaluatePrinter_Gcode());
+    regNewTemperature_Extruder1_Temperature(WaitForExtruder1Temperature.extrT + 1);
+    CHECK(evaluatePrinter_Gcode());
+    CHECK(moveComleted());
+}
+
+TEST(VirtualPrinters_Gcode, wait_for_bed_temperature)
+{
+    sendCommandToPrinter_Gcode(WaitForBedTemperature);
+    CHECK(!evaluatePrinter_Gcode())
+    CHECK_EQUAL(WaitForBedTemperature.bedT, roundf(getTargetBed_Temperature()));
+    regNewTemperature_Bed_Temperature(WaitForBedTemperature.bedT - 20);
+    CHECK(!moveComleted());
+    CHECK(!evaluatePrinter_Gcode());
+    regNewTemperature_Bed_Temperature(WaitForBedTemperature.bedT - 10);
+    CHECK(!moveComleted());
+    CHECK(!evaluatePrinter_Gcode());
+    regNewTemperature_Bed_Temperature(WaitForBedTemperature.bedT + 1);
+    CHECK(evaluatePrinter_Gcode());
+    CHECK(moveComleted());
+}
+

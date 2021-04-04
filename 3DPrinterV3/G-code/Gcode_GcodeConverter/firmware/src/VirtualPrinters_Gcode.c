@@ -1,6 +1,7 @@
 #include "VirtualPrinters_Gcode.h"
 
 #include "Config_Gcode.h"
+#include "temperature.h"
 
 #include "Fake_Motors.h"
 
@@ -16,6 +17,8 @@ static struct
     _Bool yDone;    long yDirection;
     _Bool zDone;    long zDirection;
     _Bool eDone;    long eDirection;
+    _Bool extDone;
+    _Bool bedDone;
 } currentCommand;
 
 static struct
@@ -40,6 +43,8 @@ void virtualPrintersCreate_Gcode(void)
     continiuosPrinter.X = 0;        continiuosPrinter.Y = 0;        continiuosPrinter.Z = 0;        continiuosPrinter.E = 0;
     continiuosPrinter.vX = 0;       continiuosPrinter.vY = 0;       continiuosPrinter.vZ = 0;       continiuosPrinter.vE = 0;
     currentCommand.xDone = true;    currentCommand.yDone = true;    currentCommand.zDone = true;    currentCommand.eDone = true;
+    currentCommand.extDone = true;
+    currentCommand.bedDone = true;
 }
 
 long getCurrentX_Gcode(void) {return discretePrinter.X;}
@@ -73,11 +78,13 @@ void sendCommandToPrinter_Gcode(command_Gcode command)
     continiuosPrinter.vY = command.FnY; currentCommand.yDirection = sign(command.dYn);  if (command.dYn != 0) currentCommand.yDone = false;
     continiuosPrinter.vZ = command.FnZ; currentCommand.zDirection = sign(command.dZn);  if (command.dZn != 0) currentCommand.zDone = false;
     continiuosPrinter.vE = command.FnE; currentCommand.eDirection = sign(command.dEn);  if (command.dEn != 0) currentCommand.eDone = false;
+    if (command.type == WAIT_HEAT_EXTRUDER_COMMAND) currentCommand.extDone = false;
+    if (command.type == WAIT_HEAT_BED_COMMAND)      currentCommand.bedDone = false;
 }
 
 _Bool moveComleted(void)
 {
-    return currentCommand.xDone && currentCommand.yDone && currentCommand.zDone && currentCommand.eDone;
+    return currentCommand.xDone && currentCommand.yDone && currentCommand.zDone && currentCommand.eDone && currentCommand.extDone && currentCommand.bedDone;
 }
 static void makeStepX_Gcode(void)
 {
@@ -100,37 +107,59 @@ static void makeStepE_Gcode(void)
     doStepE_Motors(currentCommand.eDirection);
 }
 
+static void checkExt1Temperature_Gcode(void) { if(getTargetExtruder1_Temperature() < getExtruder1_Temperature()) currentCommand.extDone = true; }
+static void checkBedTemperature_Gcode(void)  { if(getTargetBed_Temperature()       < getBed_Temperature())       currentCommand.bedDone = true; }
+
 _Bool evaluatePrinter_Gcode(void)
 {
-    if (moveComleted())
-        return true;
-    if (!currentCommand.xDone)
+    if (currentCommand.command.type == EMPTY_COMMAND) return true;
+    if (currentCommand.command.type == MOVE_COMMAND)
     {
-        continiuosPrinter.vX += currentCommand.command.AnX*evaluationPeriod_Gcode;
-        continiuosPrinter.X  += continiuosPrinter.vX*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.X - (float)discretePrinter.X) != 0) makeStepX_Gcode();
-        if (discretePrinter.X == currentCommand.command.dXn) currentCommand.xDone = true;
+        if (moveComleted())
+            return true;
+        if (!currentCommand.xDone)
+        {
+            continiuosPrinter.vX += currentCommand.command.AnX*evaluationPeriod_Gcode;
+            continiuosPrinter.X  += continiuosPrinter.vX*evaluationPeriod_Gcode;
+            if (lroundf(continiuosPrinter.X - (float)discretePrinter.X) != 0) makeStepX_Gcode();
+            if (discretePrinter.X == currentCommand.command.dXn) currentCommand.xDone = true;
+        }
+        if (!currentCommand.yDone)
+        {
+            continiuosPrinter.vY += currentCommand.command.AnY*evaluationPeriod_Gcode;
+            continiuosPrinter.Y  += continiuosPrinter.vY*evaluationPeriod_Gcode;
+            if (lroundf(continiuosPrinter.Y - (float)discretePrinter.Y) != 0) makeStepY_Gcode();
+            if (discretePrinter.Y == currentCommand.command.dYn) currentCommand.yDone = true;
+        }
+        if (!currentCommand.zDone)
+        {
+            continiuosPrinter.vZ += currentCommand.command.AnZ*evaluationPeriod_Gcode;
+            continiuosPrinter.Z  += continiuosPrinter.vZ*evaluationPeriod_Gcode;
+            if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0) makeStepZ_Gcode();
+            if (discretePrinter.Z == currentCommand.command.dZn) currentCommand.zDone = true;
+        }
+        if (!currentCommand.eDone)
+        {
+            continiuosPrinter.vE += currentCommand.command.AnE*evaluationPeriod_Gcode;
+            continiuosPrinter.E  += continiuosPrinter.vE*evaluationPeriod_Gcode;
+            if (lroundf(continiuosPrinter.E - (float)discretePrinter.E) != 0) makeStepE_Gcode();
+            if (discretePrinter.E == currentCommand.command.dEn) currentCommand.eDone = true;
+        }
     }
-    if (!currentCommand.yDone)
+    if (currentCommand.command.type == HEAT_EXTRUDER_COMMAND) {setExtruder1_Temperature(currentCommand.command.extrT); return true;}
+    if (currentCommand.command.type == HEAT_BED_COMMAND)      {setBed_Temperature(currentCommand.command.bedT);        return true;}
+    if (currentCommand.command.type == WAIT_HEAT_EXTRUDER_COMMAND)
     {
-        continiuosPrinter.vY += currentCommand.command.AnY*evaluationPeriod_Gcode;
-        continiuosPrinter.Y  += continiuosPrinter.vY*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.Y - (float)discretePrinter.Y) != 0) makeStepY_Gcode();
-        if (discretePrinter.Y == currentCommand.command.dYn) currentCommand.yDone = true;
+        setExtruder1_Temperature(currentCommand.command.extrT);
+        checkExt1Temperature_Gcode();
+        if(moveComleted())   return true;
     }
-    if (!currentCommand.zDone)
+    if (currentCommand.command.type == WAIT_HEAT_BED_COMMAND)
     {
-        continiuosPrinter.vZ += currentCommand.command.AnZ*evaluationPeriod_Gcode;
-        continiuosPrinter.Z  += continiuosPrinter.vZ*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0) makeStepZ_Gcode();
-        if (discretePrinter.Z == currentCommand.command.dZn) currentCommand.zDone = true;
+        setBed_Temperature(currentCommand.command.bedT);
+        checkBedTemperature_Gcode();
+        if(moveComleted())   return true;
     }
-    if (!currentCommand.eDone)
-    {
-        continiuosPrinter.vE += currentCommand.command.AnE*evaluationPeriod_Gcode;
-        continiuosPrinter.E  += continiuosPrinter.vE*evaluationPeriod_Gcode;
-        if (lroundf(continiuosPrinter.E - (float)discretePrinter.E) != 0) makeStepE_Gcode();
-        if (discretePrinter.E == currentCommand.command.dEn) currentCommand.eDone = true;
-    }
+
     return false;
 }

@@ -46,7 +46,7 @@ void convertCommand_Gcode(const char* commandString)
     if ((stringOffset = strchr(commandString, 'Z')) != NULL) {Z = atof(stringOffset + sizeof(uint8_t)); ZisChanged = true;}
     if ((stringOffset = strchr(commandString, 'E')) != NULL) {E = atof(stringOffset + sizeof(uint8_t)); EisChanged = true;}
     if ((stringOffset = strchr(commandString, 'F')) != NULL) {F = atof(stringOffset + sizeof(uint8_t)); FisChanged = true;}
-    if ((stringOffset = strchr(commandString, 'T')) != NULL) {T = atof(stringOffset + sizeof(uint8_t)); TisChanged = true;}
+    if ((stringOffset = strchr(commandString, 'S')) != NULL) {T = atof(stringOffset + sizeof(uint8_t)); TisChanged = true;}
 
     if(G==1)   { command.type = MOVE_COMMAND;               setCommand(X, Y, Z, E, F, T, T, XisChanged, YisChanged, ZisChanged, EisChanged, FisChanged, false,      false);      return; }
     if(G==92)  { command.type = SET_COORDINATES_COMMAND;    setCommand(X, Y, Z, E, F, T, T, XisChanged, YisChanged, ZisChanged, EisChanged, false,      false,      false);      return; }
