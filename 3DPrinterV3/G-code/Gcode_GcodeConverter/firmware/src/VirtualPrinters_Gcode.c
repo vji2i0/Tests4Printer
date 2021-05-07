@@ -2,6 +2,7 @@
 
 #include "Config_Gcode.h"
 #include "temperature.h"
+#include "Boundary_Gcode.h"
 
 #include "Fake_Motors.h"
 
@@ -82,7 +83,7 @@ void sendCommandToPrinter_Gcode(command_Gcode command)
     if (command.type == WAIT_HEAT_BED_COMMAND)      currentCommand.bedDone = false;
 }
 
-_Bool moveComleted(void)
+_Bool moveCompleted(void)
 {
     return currentCommand.xDone && currentCommand.yDone && currentCommand.zDone && currentCommand.eDone && currentCommand.extDone && currentCommand.bedDone;
 }
@@ -106,60 +107,83 @@ static void makeStepE_Gcode(void)
     discretePrinter.E += currentCommand.eDirection;
     doStepE_Motors(currentCommand.eDirection);
 }
+static void makeHomeStepZ1_Gcode(void) {if(!boundaryZ1isReached_Gcode()) doStepZ1_Motors(1);}
+static void makeHomeStepZ2_Gcode(void) {if(!boundaryZ2isReached_Gcode()) doStepZ2_Motors(1);}
 
 static void checkExt1Temperature_Gcode(void) { if(getTargetExtruder1_Temperature() < getExtruder1_Temperature()) currentCommand.extDone = true; }
 static void checkBedTemperature_Gcode(void)  { if(getTargetBed_Temperature()       < getBed_Temperature())       currentCommand.bedDone = true; }
 
+
+static void moveCommand_Gcode(void)
+{
+    if (!currentCommand.xDone)
+    {
+        continiuosPrinter.vX += currentCommand.command.AnX*evaluationPeriod_Gcode;
+        continiuosPrinter.X  += continiuosPrinter.vX*evaluationPeriod_Gcode;
+        if (lroundf(continiuosPrinter.X - (float)discretePrinter.X) != 0) makeStepX_Gcode();
+        if (discretePrinter.X == currentCommand.command.dXn) currentCommand.xDone = true;
+    }
+    if (!currentCommand.yDone)
+    {
+        continiuosPrinter.vY += currentCommand.command.AnY*evaluationPeriod_Gcode;
+        continiuosPrinter.Y  += continiuosPrinter.vY*evaluationPeriod_Gcode;
+        if (lroundf(continiuosPrinter.Y - (float)discretePrinter.Y) != 0) makeStepY_Gcode();
+        if (discretePrinter.Y == currentCommand.command.dYn) currentCommand.yDone = true;
+    }
+    if (!currentCommand.zDone)
+    {
+        continiuosPrinter.vZ += currentCommand.command.AnZ*evaluationPeriod_Gcode;
+        continiuosPrinter.Z  += continiuosPrinter.vZ*evaluationPeriod_Gcode;
+        if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0) makeStepZ_Gcode();
+        if (discretePrinter.Z == currentCommand.command.dZn) currentCommand.zDone = true;
+    }
+    if (!currentCommand.eDone)
+    {
+        continiuosPrinter.vE += currentCommand.command.AnE*evaluationPeriod_Gcode;
+        continiuosPrinter.E  += continiuosPrinter.vE*evaluationPeriod_Gcode;
+        if (lroundf(continiuosPrinter.E - (float)discretePrinter.E) != 0) makeStepE_Gcode();
+        if (discretePrinter.E == currentCommand.command.dEn) currentCommand.eDone = true;
+    }
+}
+static void heatExtruder_Gcode(void)
+{
+    setExtruder1_Temperature(currentCommand.command.extrT);
+}
+static void heatBed_Gcode(void)
+{
+    setBed_Temperature(currentCommand.command.bedT);
+}
+static void waitHeatExtruder_Gcode(void)
+{
+    setExtruder1_Temperature(currentCommand.command.extrT);
+    checkExt1Temperature_Gcode();
+}
+static void waitHeatBed_Gcode(void)
+{
+    setBed_Temperature(currentCommand.command.bedT);
+    checkBedTemperature_Gcode();
+}
+static void goHomeZ_Gcode(void)
+{
+    continiuosPrinter.Z  += continiuosPrinter.vZ*evaluationPeriod_Gcode;
+    if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0)
+    {
+        discretePrinter.Z += 1;
+        makeHomeStepZ1_Gcode();
+        makeHomeStepZ2_Gcode();
+    }
+}
+
+
 _Bool evaluatePrinter_Gcode(void)
 {
-    if (currentCommand.command.type == EMPTY_COMMAND) return true;
-    if (currentCommand.command.type == MOVE_COMMAND)
-    {
-        if (moveComleted())
-            return true;
-        if (!currentCommand.xDone)
-        {
-            continiuosPrinter.vX += currentCommand.command.AnX*evaluationPeriod_Gcode;
-            continiuosPrinter.X  += continiuosPrinter.vX*evaluationPeriod_Gcode;
-            if (lroundf(continiuosPrinter.X - (float)discretePrinter.X) != 0) makeStepX_Gcode();
-            if (discretePrinter.X == currentCommand.command.dXn) currentCommand.xDone = true;
-        }
-        if (!currentCommand.yDone)
-        {
-            continiuosPrinter.vY += currentCommand.command.AnY*evaluationPeriod_Gcode;
-            continiuosPrinter.Y  += continiuosPrinter.vY*evaluationPeriod_Gcode;
-            if (lroundf(continiuosPrinter.Y - (float)discretePrinter.Y) != 0) makeStepY_Gcode();
-            if (discretePrinter.Y == currentCommand.command.dYn) currentCommand.yDone = true;
-        }
-        if (!currentCommand.zDone)
-        {
-            continiuosPrinter.vZ += currentCommand.command.AnZ*evaluationPeriod_Gcode;
-            continiuosPrinter.Z  += continiuosPrinter.vZ*evaluationPeriod_Gcode;
-            if (lroundf(continiuosPrinter.Z - (float)discretePrinter.Z) != 0) makeStepZ_Gcode();
-            if (discretePrinter.Z == currentCommand.command.dZn) currentCommand.zDone = true;
-        }
-        if (!currentCommand.eDone)
-        {
-            continiuosPrinter.vE += currentCommand.command.AnE*evaluationPeriod_Gcode;
-            continiuosPrinter.E  += continiuosPrinter.vE*evaluationPeriod_Gcode;
-            if (lroundf(continiuosPrinter.E - (float)discretePrinter.E) != 0) makeStepE_Gcode();
-            if (discretePrinter.E == currentCommand.command.dEn) currentCommand.eDone = true;
-        }
-    }
-    if (currentCommand.command.type == HEAT_EXTRUDER_COMMAND) {setExtruder1_Temperature(currentCommand.command.extrT); return true;}
-    if (currentCommand.command.type == HEAT_BED_COMMAND)      {setBed_Temperature(currentCommand.command.bedT);        return true;}
-    if (currentCommand.command.type == WAIT_HEAT_EXTRUDER_COMMAND)
-    {
-        setExtruder1_Temperature(currentCommand.command.extrT);
-        checkExt1Temperature_Gcode();
-        if(moveComleted())   return true;
-    }
-    if (currentCommand.command.type == WAIT_HEAT_BED_COMMAND)
-    {
-        setBed_Temperature(currentCommand.command.bedT);
-        checkBedTemperature_Gcode();
-        if(moveComleted())   return true;
-    }
+    if (currentCommand.command.type == EMPTY_COMMAND)               return true;
+    if (currentCommand.command.type == MOVE_COMMAND)                {if (moveCompleted()) return true;  moveCommand_Gcode(); }
+    if (currentCommand.command.type == HEAT_EXTRUDER_COMMAND)       {heatExtruder_Gcode();              return true;}
+    if (currentCommand.command.type == HEAT_BED_COMMAND)            {heatBed_Gcode();                   return true;}
+    if (currentCommand.command.type == WAIT_HEAT_EXTRUDER_COMMAND)  {waitHeatExtruder_Gcode();          if(moveCompleted()) return true;}
+    if (currentCommand.command.type == WAIT_HEAT_BED_COMMAND)       {waitHeatBed_Gcode();               if(moveCompleted()) return true;}
+    if (currentCommand.command.type == GO_HOME_Z_COMMAND)           {if(boundaryZ1isReached_Gcode() && boundaryZ2isReached_Gcode()) return true; goHomeZ_Gcode();}
 
     return false;
 }

@@ -327,10 +327,10 @@ static void MoveZ_Analyser(void)
     command_Gcode command3 = {MOVE_COMMAND, 0, 0, z3, 0,    0, 0, vZ3, 0,    0, 0, aZ3, 0,   0, 0};  firstInCommandBuffer_Gcode(command3);
 }
 
-static const float HOME_COARSE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
-static const float HOME_COARSE_SPEED_Z_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
-static const float HOME_FINE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
-static const float HOME_FINE_SPEED_Z_STEPS_PER_SECOND = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
+static const float HOME_COARSE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float HOME_COARSE_SPEED_Z_STEPS_PER_SECOND = (float)HOME_COARSE_SPEED_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
+static const float HOME_FINE_SPEED_XY_STEPS_PER_SECOND = (float)HOME_FINE_SPEED_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float HOME_FINE_SPEED_Z_STEPS_PER_SECOND = (float)HOME_FINE_SPEED_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
 static const long  HOME_FINE_STEPS_XY = HOME_FINE_DISTANCE*STEPS_PER_MM_XY;
 static const long  HOME_FINE_STEPS_Z = HOME_FINE_DISTANCE*STEPS_PER_MM_Z;
 

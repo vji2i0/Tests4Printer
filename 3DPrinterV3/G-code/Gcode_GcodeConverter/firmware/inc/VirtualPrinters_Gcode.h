@@ -29,6 +29,6 @@ void sendCommandToPrinter_Gcode(command_Gcode command);
 
 _Bool evaluatePrinter_Gcode(void);
 
-_Bool moveComleted(void);
+_Bool moveCompleted(void);
 
 #endif

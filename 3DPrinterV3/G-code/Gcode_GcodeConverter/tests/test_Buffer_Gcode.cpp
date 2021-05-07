@@ -5567,10 +5567,10 @@ TEST(Descrete_command_analyser_Gcode, one_command_move_slow_ZE)
 }
 
 
-static const float homeCoarseSpeedXY = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
-static const float homeCoarseSpeedZ = (float)HOME_COARSE_SPEED*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
-static const float homeFineSpeedXY = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
-static const float homeFineSpeedZ = (float)HOME_FINE_SPEED*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
+static const float homeCoarseSpeedXY = (float)HOME_COARSE_SPEED_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float homeCoarseSpeedZ = (float)HOME_COARSE_SPEED_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
+static const float homeFineSpeedXY = (float)HOME_FINE_SPEED_XY*(float)STEPS_PER_MM_XY/(float)SECONDS_IN_MINUTE;
+static const float homeFineSpeedZ = (float)HOME_FINE_SPEED_Z*(float)STEPS_PER_MM_Z/(float)SECONDS_IN_MINUTE;
 static const float homeFineDistanceXY = (float)HOME_FINE_DISTANCE*(float)STEPS_PER_MM_XY;
 static const float homeFineDistanceZ = (float)HOME_FINE_DISTANCE*(float)STEPS_PER_MM_Z;
 
@@ -6277,7 +6277,7 @@ TEST(Descrete_command_analyser_Gcode, home_Z_positive_distance)
 
 TEST(Descrete_command_analyser_Gcode, home_Z_short_distance)
 {
-    const descreteCommand_Gcode descreteHome = {GO_HOME_Z_COMMAND, 0, 0, -1000, 0,     0, 0, 0,     0, 0};
+    const descreteCommand_Gcode descreteHome = {GO_HOME_Z_COMMAND, 0, 0, -500, 0,     0, 0, 0,     0, 0};
 
 
     addElementToDescreteCommandBuffer_Gcode(descreteHome);

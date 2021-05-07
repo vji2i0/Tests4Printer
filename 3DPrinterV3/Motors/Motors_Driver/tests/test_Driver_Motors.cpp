@@ -41,30 +41,39 @@ TEST_GROUP(Driver_Motors)
 };
 
 
-void EnableX_Motors(void)      { mock_c()->actualCall("EnableX");}
-void DisableX_Motors(void)     { mock_c()->actualCall("DisableX");}
-void ForwardX_Motors(void)     { mock_c()->actualCall("ForwardX");}
-void BackwardX_Motors(void)    { mock_c()->actualCall("BackwardX");}
-void StepOnX_Motors(void)      { mock_c()->actualCall("StepOnX");}
-void StepOffX_Motors(void)     { mock_c()->actualCall("StepOffX");}
-void EnableY_Motors(void)      { mock_c()->actualCall("EnableY");}
-void DisableY_Motors(void)     { mock_c()->actualCall("DisableY");}
-void ForwardY_Motors(void)     { mock_c()->actualCall("ForwardY");}
-void BackwardY_Motors(void)    { mock_c()->actualCall("BackwardY");}
-void StepOnY_Motors(void)      { mock_c()->actualCall("StepOnY");}
-void StepOffY_Motors(void)     { mock_c()->actualCall("StepOffY");}
-void EnableZ_Motors(void)      { mock_c()->actualCall("EnableZ");}
-void DisableZ_Motors(void)     { mock_c()->actualCall("DisableZ");}
-void ForwardZ_Motors(void)     { mock_c()->actualCall("ForwardZ");}
-void BackwardZ_Motors(void)    { mock_c()->actualCall("BackwardZ");}
-void StepOnZ_Motors(void)      { mock_c()->actualCall("StepOnZ");}
-void StepOffZ_Motors(void)     { mock_c()->actualCall("StepOffZ");}
-void EnableE_Motors(void)      { mock_c()->actualCall("EnableE");}
-void DisableE_Motors(void)     { mock_c()->actualCall("DisableE");}
-void ForwardE_Motors(void)     { mock_c()->actualCall("ForwardE");}
-void BackwardE_Motors(void)    { mock_c()->actualCall("BackwardE");}
-void StepOnE_Motors(void)      { mock_c()->actualCall("StepOnE");}
-void StepOffE_Motors(void)     { mock_c()->actualCall("StepOffE");}
+void EnableX_Motors(void)       { mock_c()->actualCall("EnableX");}
+void DisableX_Motors(void)      { mock_c()->actualCall("DisableX");}
+void ForwardX_Motors(void)      { mock_c()->actualCall("ForwardX");}
+void BackwardX_Motors(void)     { mock_c()->actualCall("BackwardX");}
+void StepOnX_Motors(void)       { mock_c()->actualCall("StepOnX");}
+void StepOffX_Motors(void)      { mock_c()->actualCall("StepOffX");}
+void EnableY_Motors(void)       { mock_c()->actualCall("EnableY");}
+void DisableY_Motors(void)      { mock_c()->actualCall("DisableY");}
+void ForwardY_Motors(void)      { mock_c()->actualCall("ForwardY");}
+void BackwardY_Motors(void)     { mock_c()->actualCall("BackwardY");}
+void StepOnY_Motors(void)       { mock_c()->actualCall("StepOnY");}
+void StepOffY_Motors(void)      { mock_c()->actualCall("StepOffY");}
+void EnableZ_Motors(void)       { mock_c()->actualCall("EnableZ");}
+void DisableZ_Motors(void)      { mock_c()->actualCall("DisableZ");}
+void ForwardZ_Motors(void)      { mock_c()->actualCall("ForwardZ");}
+void BackwardZ_Motors(void)     { mock_c()->actualCall("BackwardZ");}
+void StepOnZ_Motors(void)       { mock_c()->actualCall("StepOnZ");}
+void StepOffZ_Motors(void)      { mock_c()->actualCall("StepOffZ");}
+void EnableE_Motors(void)       { mock_c()->actualCall("EnableE");}
+void DisableE_Motors(void)      { mock_c()->actualCall("DisableE");}
+void ForwardE_Motors(void)      { mock_c()->actualCall("ForwardE");}
+void BackwardE_Motors(void)     { mock_c()->actualCall("BackwardE");}
+void StepOnE_Motors(void)       { mock_c()->actualCall("StepOnE");}
+void StepOffE_Motors(void)      { mock_c()->actualCall("StepOffE");}
+
+void ForwardZ1_Motors(void)     { mock_c()->actualCall("ForwardZ1");}
+void BackwardZ1_Motors(void)    { mock_c()->actualCall("BackwardZ1");}
+void StepOnZ1_Motors(void)      { mock_c()->actualCall("StepOnZ1");}
+void StepOffZ1_Motors(void)     { mock_c()->actualCall("StepOffZ1");}
+void ForwardZ2_Motors(void)     { mock_c()->actualCall("ForwardZ2");}
+void BackwardZ2_Motors(void)    { mock_c()->actualCall("BackwardZ2");}
+void StepOnZ2_Motors(void)      { mock_c()->actualCall("StepOnZ2");}
+void StepOffZ2_Motors(void)     { mock_c()->actualCall("StepOffZ2");}
 
 
 TEST(Driver_Motors, create_and_do_noting)
@@ -277,6 +286,59 @@ TEST(Driver_Motors, two_sequential_steps_along_e)
     evaluate_Motors();
     doStepE_Motors(1);
     evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, step_foreward_along_z1)
+{
+    mock_c()->expectOneCall("ForwardZ1");
+    mock_c()->expectOneCall("StepOnZ1");
+    mock_c()->expectOneCall("StepOffZ1");
+
+    doStepZ1_Motors(1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, step_backward_along_z1)
+{
+    mock_c()->expectOneCall("BackwardZ1");
+    mock_c()->expectOneCall("StepOnZ1");
+    mock_c()->expectOneCall("StepOffZ1");
+
+    doStepZ1_Motors(-1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+
+TEST(Driver_Motors, step_foreward_along_z2)
+{
+    mock_c()->expectOneCall("ForwardZ2");
+    mock_c()->expectOneCall("StepOnZ2");
+    mock_c()->expectOneCall("StepOffZ2");
+
+    doStepZ2_Motors(1);
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+    evaluate_Motors();
+}
+
+TEST(Driver_Motors, step_backward_along_z2)
+{
+    mock_c()->expectOneCall("BackwardZ2");
+    mock_c()->expectOneCall("StepOnZ2");
+    mock_c()->expectOneCall("StepOffZ2");
+
+    doStepZ2_Motors(-1);
     evaluate_Motors();
     evaluate_Motors();
     evaluate_Motors();

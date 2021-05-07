@@ -26,5 +26,13 @@ void BackwardE_Motors(void);
 void StepOnE_Motors(void);
 void StepOffE_Motors(void);
 
+void ForwardZ1_Motors(void);
+void BackwardZ1_Motors(void);
+void StepOnZ1_Motors(void);
+void StepOffZ1_Motors(void);
+void ForwardZ2_Motors(void);
+void BackwardZ2_Motors(void);
+void StepOnZ2_Motors(void);
+void StepOffZ2_Motors(void);
 
 #endif

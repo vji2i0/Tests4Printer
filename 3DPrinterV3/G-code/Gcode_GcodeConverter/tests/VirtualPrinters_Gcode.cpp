@@ -26,6 +26,7 @@ extern "C"
 
 #include "Buffer_Gcode.h"
 #include "temperature.h"
+#include "Boundary_Gcode.h"
 
 #include "math.h"
 
@@ -62,6 +63,8 @@ const command_Gcode SetBedTemperature =       {HEAT_BED_COMMAND,  0, 0, 0, 0,   
 const command_Gcode WaitForExtruder1Temperature = {WAIT_HEAT_EXTRUDER_COMMAND,  0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0,   200, 0};
 const command_Gcode WaitForBedTemperature =       {WAIT_HEAT_BED_COMMAND,  0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0,   0, 100};
 
+const command_Gcode homeZ = {GO_HOME_Z_COMMAND, 0, 0, 0, 0,    0, 0, -667, 0,    0, 0, 0, 0,   0, 0};
+
 
 
 TEST_GROUP(VirtualPrinters_Gcode)
@@ -69,6 +72,7 @@ TEST_GROUP(VirtualPrinters_Gcode)
     void setup()
     {
         virtualPrintersCreate_Gcode();
+        createBoundary_Gcode();
     }
     void teardown()
     {
@@ -256,14 +260,14 @@ TEST(VirtualPrinters_Gcode, wait_for_extruder1_temperature)
     CHECK(!evaluatePrinter_Gcode())
     CHECK_EQUAL(WaitForExtruder1Temperature.extrT, roundf(getTargetExtruder1_Temperature()));
     regNewTemperature_Extruder1_Temperature(WaitForExtruder1Temperature.extrT - 20);
-    CHECK(!moveComleted());
+    CHECK(!moveCompleted());
     CHECK(!evaluatePrinter_Gcode());
     regNewTemperature_Extruder1_Temperature(WaitForExtruder1Temperature.extrT - 10);
-    CHECK(!moveComleted());
+    CHECK(!moveCompleted());
     CHECK(!evaluatePrinter_Gcode());
     regNewTemperature_Extruder1_Temperature(WaitForExtruder1Temperature.extrT + 1);
     CHECK(evaluatePrinter_Gcode());
-    CHECK(moveComleted());
+    CHECK(moveCompleted());
 }
 
 TEST(VirtualPrinters_Gcode, wait_for_bed_temperature)
@@ -272,13 +276,72 @@ TEST(VirtualPrinters_Gcode, wait_for_bed_temperature)
     CHECK(!evaluatePrinter_Gcode())
     CHECK_EQUAL(WaitForBedTemperature.bedT, roundf(getTargetBed_Temperature()));
     regNewTemperature_Bed_Temperature(WaitForBedTemperature.bedT - 20);
-    CHECK(!moveComleted());
+    CHECK(!moveCompleted());
     CHECK(!evaluatePrinter_Gcode());
     regNewTemperature_Bed_Temperature(WaitForBedTemperature.bedT - 10);
-    CHECK(!moveComleted());
+    CHECK(!moveCompleted());
     CHECK(!evaluatePrinter_Gcode());
     regNewTemperature_Bed_Temperature(WaitForBedTemperature.bedT + 1);
     CHECK(evaluatePrinter_Gcode());
-    CHECK(moveComleted());
+    CHECK(moveCompleted());
 }
 
+
+TEST(VirtualPrinters_Gcode, home_Z1_and_Z2_boundary_is_not_reached)
+{
+    sendCommandToPrinter_Gcode(homeZ);
+
+    setBoundaryZ1isNotReached_Gcode();
+    setBoundaryZ2isNotReached_Gcode();
+    CHECK(!boundaryZ1isReached_Gcode());
+    CHECK(!boundaryZ2isReached_Gcode());
+    CHECK(!evaluatePrinter_Gcode());
+
+    int n;
+    for (n=0;n<20;n++) evaluatePrinter_Gcode();
+
+    CHECK(getCurrentZ_Gcode()>0);
+}
+
+TEST(VirtualPrinters_Gcode, home_Z1_boundary_is_not_reached)
+{
+    sendCommandToPrinter_Gcode(homeZ);
+
+    setBoundaryZ1isNotReached_Gcode();
+    setBoundaryZ2isReached_Gcode();
+    CHECK(!boundaryZ1isReached_Gcode());
+    CHECK(boundaryZ2isReached_Gcode());
+    CHECK(!evaluatePrinter_Gcode());
+
+    int n;
+    for (n=0;n<20;n++) evaluatePrinter_Gcode();
+
+    CHECK(getCurrentZ_Gcode()>0);
+}
+
+TEST(VirtualPrinters_Gcode, home_Z2_boundary_is_not_reached)
+{
+    sendCommandToPrinter_Gcode(homeZ);
+
+    setBoundaryZ1isReached_Gcode();
+    setBoundaryZ2isNotReached_Gcode();
+    CHECK(boundaryZ1isReached_Gcode());
+    CHECK(!boundaryZ2isReached_Gcode());
+    CHECK(!evaluatePrinter_Gcode());
+
+    int n;
+    for (n=0;n<20;n++) evaluatePrinter_Gcode();
+
+    CHECK(getCurrentZ_Gcode()>0);
+}
+
+TEST(VirtualPrinters_Gcode, home_Z_boundary_is_reached)
+{
+    sendCommandToPrinter_Gcode(homeZ);
+
+    setBoundaryZ1isReached_Gcode();
+    setBoundaryZ2isReached_Gcode();
+    CHECK(boundaryZ1isReached_Gcode());
+    CHECK(boundaryZ2isReached_Gcode());
+    CHECK(evaluatePrinter_Gcode());
+}
